@@ -23,18 +23,18 @@ let month = today.getMonth();
 let year = today.getFullYear();
 
 const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  "Gennaio",
+  "Febbraio",
+  "Marzo",
+  "Aprile",
+  "Maggio",
+  "Giugno",
+  "Luglio",
+  "Agosto",
+  "Settembre",
+  "Ottobre",
+  "Novembre",
+  "Dicembre"
 ];
 
 // const eventsArr = [
@@ -70,9 +70,6 @@ function fetchEvents() {
 }
 
 
-
-
-
 //function to add days in days with class day and prev-date next-date on previous month and next month days and active on today
 function initCalendar() {
   const firstDay = new Date(year, month, 1);
@@ -81,33 +78,28 @@ function initCalendar() {
   const prevDays = prevLastDay.getDate();
   const lastDate = lastDay.getDate();
   const day = firstDay.getDay();
-  const nextDays = 7 - lastDay.getDay() - 1;
+
+  // Cambia la logica per spostare la settimana a partire da lunedì
+  const shift = day === 0 ? 6 : day - 1;  // Se è domenica (0), la settimana deve iniziare da lunedì (6)
+
+  const nextDays = 7 - ((shift + lastDate) % 7);
 
   date.innerHTML = months[month] + " " + year;
 
   let days = "";
 
-  for (let x = day; x > 0; x--) {
+  for (let x = shift; x > 0; x--) {
     days += `<div class="day prev-date">${prevDays - x + 1}</div>`;
   }
 
   for (let i = 1; i <= lastDate; i++) {
-    //check if event is present on that day
     let event = false;
     eventsArr.forEach((eventObj) => {
-      if (
-        eventObj.day === i &&
-        eventObj.month === month + 1 &&
-        eventObj.year === year
-      ) {
+      if (eventObj.day === i && eventObj.month === month + 1 && eventObj.year === year) {
         event = true;
       }
     });
-    if (
-      i === new Date().getDate() &&
-      year === new Date().getFullYear() &&
-      month === new Date().getMonth()
-    ) {
+    if (i === new Date().getDate() && year === new Date().getFullYear() && month === new Date().getMonth()) {
       activeDay = i;
       getActiveDay(i);
       updateEvents(i);
@@ -120,7 +112,7 @@ function initCalendar() {
       if (event) {
         days += `<div class="day event">${i}</div>`;
       } else {
-        days += `<div class="day ">${i}</div>`;
+        days += `<div class="day">${i}</div>`;
       }
     }
   }
@@ -128,9 +120,18 @@ function initCalendar() {
   for (let j = 1; j <= nextDays; j++) {
     days += `<div class="day next-date">${j}</div>`;
   }
+
   daysContainer.innerHTML = days;
   addListner();
 }
+
+
+
+fetchEvents().then(() => {
+  initCalendar();
+});
+
+
 
 //function to add month and year on prev and next button
 function prevMonth() {
@@ -154,7 +155,7 @@ function nextMonth() {
 prev.addEventListener("click", prevMonth);
 next.addEventListener("click", nextMonth);
 
-initCalendar();
+
 
 //function to add active on day
 function addListner() {
@@ -314,8 +315,7 @@ addEventTitle.addEventListener("input", (e) => {
 
 function defineProperty() {
   var osccred = document.createElement("div");
-  osccred.innerHTML =
-    "A Project By <a href='https://www.youtube.com/channel/UCiUtBDVaSmMGKxg1HYeK-BQ' target=_blank>Open Source Coding</a>";
+  
   osccred.style.position = "absolute";
   osccred.style.bottom = "0";
   osccred.style.right = "0";
@@ -435,49 +435,76 @@ addEventSubmit.addEventListener("click", () => {
 
 //function to delete event when clicked on event
 eventsContainer.addEventListener("click", (e) => {
-  if (e.target.classList.contains("event")) {
+  if (e.target.closest(".event")) {
     if (confirm("Are you sure you want to delete this event?")) {
-      const eventTitle = e.target.children[0].children[1].innerHTML;
-      eventsArr.forEach((event) => {
-        if (
+      const eventElement = e.target.closest(".event");
+      const eventTitle = eventElement.querySelector(".event-title").innerHTML;
+
+      // Trova l'evento corrispondente nell'array
+      const eventIndex = eventsArr.findIndex(
+        (event) =>
+          event.title === eventTitle &&
           event.day === activeDay &&
           event.month === month + 1 &&
           event.year === year
-        ) {
-          event.events.forEach((item, index) => {
-            if (item.title === eventTitle) {
-              event.events.splice(index, 1);
+      );
+
+      if (eventIndex !== -1) {
+        const eventToDelete = eventsArr[eventIndex];
+
+        // Rimuovi l'evento dal file JSON sul server
+        fetch(`http://localhost:3000/events`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(eventToDelete),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Errore durante l'eliminazione dell'evento");
             }
-          });
-          //if no events left in a day then remove that day from eventsArr
-          if (event.events.length === 0) {
-            eventsArr.splice(eventsArr.indexOf(event), 1);
-            //remove event class from day
+
+            // Rimuovi l'evento dall'array locale
+            eventsArr.splice(eventIndex, 1);
+
+            // Aggiorna l'interfaccia
+            updateEvents(activeDay);
+
+            // Rimuovi la classe "event" dal giorno se non ci sono più eventi
             const activeDayEl = document.querySelector(".day.active");
-            if (activeDayEl.classList.contains("event")) {
+            if (!eventsArr.some((event) => event.day === activeDay)) {
               activeDayEl.classList.remove("event");
             }
-          }
-        }
-      });
-      updateEvents(activeDay);
+
+            alert("Evento eliminato con successo!");
+          })
+          .catch((error) => {
+            console.error(error);
+            alert("Errore durante l'eliminazione dell'evento.");
+          });
+      } else {
+        alert("Evento non trovato.");
+      }
     }
   }
 });
 
 //function to save events in local storage
+/*
 function saveEvents() {
   localStorage.setItem("events", JSON.stringify(eventsArr));
-}
+}*/
 
 //function to get events from local storage
+/*
 function getEvents() {
   //check if events are already saved in local storage then return event else nothing
   if (localStorage.getItem("events") === null) {
     return;
   }
   eventsArr.push(...JSON.parse(localStorage.getItem("events")));
-}
+}*/
 
 function convertTime(time) {
   //convert time to 24 hour format

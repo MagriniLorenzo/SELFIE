@@ -51,10 +51,50 @@ app.post("/events", (req, res) => {
     });
 });
 
+// Endpoint per eliminare un evento
+app.delete("/events", (req, res) => {
+    const { title, day, month, year } = req.body; // Parametri dell'evento da eliminare
+
+    if (!title || !day || !month || !year) {
+        return res.status(400).send("I parametri 'title', 'day', 'month' e 'year' sono obbligatori.");
+    }
+
+    fs.readFile(FILE_PATH, "utf8", (err, data) => {
+        if (err && err.code !== "ENOENT") {
+            return res.status(500).send("Errore nella lettura del file");
+        }
+
+        const existingEvents = data ? JSON.parse(data) : [];
+
+        // Filtra gli eventi che non corrispondono a quelli da eliminare
+        const updatedEvents = existingEvents.filter(
+            (event) =>
+                event.title !== title ||
+                event.day !== day ||
+                event.month !== month ||
+                event.year !== year
+        );
+
+        // Se non è stato trovato nessun evento corrispondente
+        if (existingEvents.length === updatedEvents.length) {
+            return res.status(404).send("Evento non trovato.");
+        }
+
+        // Scrivi il file con gli eventi aggiornati
+        fs.writeFile(FILE_PATH, JSON.stringify(updatedEvents, null, 2), (err) => {
+            if (err) {
+                return res.status(500).send("Errore nella scrittura del file");
+            }
+            res.send("Evento eliminato con successo");
+        });
+    });
+});
+
 // Endpoint per servire la pagina principale
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+  
 
 // Avvio del server
 app.listen(PORT, () => {
