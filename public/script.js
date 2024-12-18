@@ -247,10 +247,17 @@ function gotoDate() {
 //function get active day day name and date and update eventday eventdate
 function getActiveDay(date) {
   const day = new Date(year, month, date);
-  const dayName = day.toString().split(" ")[0];
+  
+  // Ottieni il nome del giorno della settimana in italiano
+  const dayName = day.toLocaleDateString('it-IT', { weekday: 'long' });
+
+  // Aggiorna eventDay con il nome del giorno in italiano
   eventDay.innerHTML = dayName;
+
+  // Aggiorna eventDate con il formato giorno mese anno
   eventDate.innerHTML = date + " " + months[month] + " " + year;
 }
+
 
 //function update events when a day is active
 function updateEvents(date) {

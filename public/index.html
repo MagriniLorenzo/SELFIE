@@ -1,95 +1,226 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Stay organized with our user-friendly Calendar featuring events, reminders, and a customizable interface. Built with HTML, CSS, and JavaScript. Start scheduling today!"
-    />
-    <meta
-      name="keywords"
-      content="calendar, events, reminders, javascript, html, css, open source coding"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
-      integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <link rel="stylesheet" href="style.css" />
-    <title>Calendar with Events</title>
-  </head>
-  <body>
-    <div class="container">
-      <div class="left">
-        <div class="calendar">
-          <div class="month">
-            <i class="fas fa-angle-left prev"></i>
-            <div class="date">december 2015</div>
-            <i class="fas fa-angle-right next"></i>
-          </div>
-          <div class="weekdays">
-            <div>Lun</div>
-            <div>Mar</div>
-            <div>Mer</div>
-            <div>Gio</div>
-            <div>Ven</div>
-            <div>Sab</div>
-            <div>Dom</div>
-          </div>
-          <div class="days"></div>
-          <div class="goto-today">
-            <div class="goto">
-              <input type="text" placeholder="mm/yyyy" class="date-input" />
-              <button class="goto-btn">Go</button>
-            </div>
-            <button class="today-btn">Today</button>
-          </div>
-        </div>
-      </div>
-      <div class="right">
-        <div class="today-date">
-          <div class="event-day">wed</div>
-          <div class="event-date">12th december 2022</div>
-        </div>
-        <div class="events"></div>
-        <div class="add-event-wrapper">
-          <div class="add-event-header">
-            <div class="title">Add Event</div>
-            <i class="fas fa-times close"></i>
-          </div>
-          <div class="add-event-body">
-            <div class="add-event-input">
-              <input type="text" placeholder="Event Name" class="event-name" />
-            </div>
-            <div class="add-event-input">
-              <input
-                type="text"
-                placeholder="Event Time From"
-                class="event-time-from"
-              />
-            </div>
-            <div class="add-event-input">
-              <input
-                type="text"
-                placeholder="Event Time To"
-                class="event-time-to"
-              />
-            </div>
-          </div>
-          <div class="add-event-footer">
-            <button class="add-event-btn">Add Event</button>
-          </div>
-        </div>
-      </div>
-      <button class="add-event">
-        <i class="fas fa-plus"></i>
-      </button>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Events Widget</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="widget-container calendar-widget" id="widget">
+    <div class="current-week">
+      <h1 id="current-week"></h1>
     </div>
-
-    <script src="script.js"></script>
-  </body>
+    <div class="week-days"></div>
+    <div class="events-today">
+      <h2 id="events-today-title">Eventi di Oggi</h2>
+      <ul id="events-list"></ul>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
 </html>
+
+<style>
+  body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.widget-container {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  width: 350px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.current-week h1, .events-today h2 {
+  font-size: 20px;
+  color: #333;
+}
+
+.week-days {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.week-days div {
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  text-align: center;
+}
+
+.week-days div:hover {
+  background-color: #f0f0f0;
+}
+
+.week-day.today:hover {
+  background-color: #f0f0f0;
+}
+
+#events-list {
+  list-style: none;
+  padding: 0;
+}
+
+#events-list li {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  color: #333;
+}
+
+#events-list li:last-child {
+  border-bottom: none;
+}
+
+/* Giorno odierno: mantiene il colore rosso */
+.week-day.today {
+  color: red;
+  font-weight: bold;
+}
+
+/* Giorno selezionato: mantiene il colore rosso se è il giorno odierno */
+.week-day.selected.today {
+  background-color: lightblue;  /* Colore di sfondo per il giorno selezionato */
+  color: red;  /* Mantiene il colore rosso del testo per il giorno odierno selezionato */
+  border-radius: 5px; /* Per rendere l'angolo del giorno selezionato arrotondato */
+}
+
+/* Giorno selezionato (non odierno): cambia il colore del testo a bianco */
+.week-day.selected:not(.today) {
+  background-color: lightblue;  /* Colore di sfondo per il giorno selezionato */
+  color: white;  /* Colore del testo */
+  border-radius: 5px; /* Per rendere l'angolo del giorno selezionato arrotondato */
+}
+
+
+.widget-container {
+  cursor: pointer; /* Imposta il cursore a mano per l'intero widget */
+}
+
+
+
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const listaEventi = document.getElementById("events-list");
+    const currentWeek = document.getElementById("current-week");
+    const weekDaysContainer = document.querySelector(".week-days");
+    const eventsTodayTitle = document.getElementById("events-today-title");
+
+    function normalizeDate(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function getStartOfWeek(date) {
+      const day = date.getDay(),
+            diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(date.setDate(diff)).setHours(0, 0, 0, 0);
+    }
+
+    function getWeekDays(date) {
+      const startOfWeek = getStartOfWeek(new Date(date));
+      return Array.from({ length: 7 }, (_, i) => new Date(startOfWeek + i * 86400000));
+    }
+
+    function displayWeekDays() {
+      if (!weekDaysContainer) return;
+
+      const dataCorrente = new Date();
+      const weekDays = getWeekDays(dataCorrente);
+      weekDaysContainer.innerHTML = weekDays.map(day => {
+        const dayName = day.toLocaleDateString('it-IT', { weekday: 'short' });
+        const isToday = normalizeDate(day).getTime() === normalizeDate(dataCorrente).getTime();
+        return `<div class="week-day ${isToday ? 'today' : ''}" data-date="${day.toISOString()}">${dayName} ${day.getDate()}</div>`;
+      }).join('');
+    }
+
+    function displayCurrentWeek() {
+      const dataCorrente = new Date();
+      const formattedDate = dataCorrente.toLocaleDateString('it-IT', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      if (currentWeek) {
+        currentWeek.textContent = `Settimana di: ${formattedDate}`;
+      }
+    }
+
+    function recuperaEventi(data) {
+      fetch("http://localhost:3000/events")
+        .then(res => res.json())
+        .then(dati => {
+          const eventiDaMostrare = dati.filter(evento => {
+            const dataEvento = new Date(evento.year, evento.month - 1, evento.day);
+            return normalizeDate(dataEvento).getTime() === normalizeDate(data).getTime();
+          });
+
+          if (listaEventi) {
+            listaEventi.innerHTML = eventiDaMostrare.length 
+              ? eventiDaMostrare.map(evento => `<li>${evento.time} - ${evento.title}</li>`).join('')
+              : '<li>Nessun evento per oggi!</li>';
+          }
+        })
+        .catch(console.error);
+    }
+
+    displayWeekDays();
+    displayCurrentWeek();
+    recuperaEventi(new Date());
+
+    // Pre-seleziona il giorno odierno
+    const preSelectToday = () => {
+      const today = weekDaysContainer.querySelector(".today");
+      if (today) {
+        today.classList.add("selected");
+        eventsTodayTitle.textContent = "Eventi di oggi"; // Imposta il titolo come "Eventi di oggi"
+        recuperaEventi(new Date()); // Mostra gli eventi di oggi
+      }
+    };
+
+    if (weekDaysContainer) {
+      weekDaysContainer.addEventListener("click", (e) => {
+        if (e.target.classList.contains("week-day")) {
+          // Rimuovi la classe 'selected' da tutti i giorni
+          const selectedDay = weekDaysContainer.querySelector(".week-day.selected");
+          if (selectedDay) {
+            selectedDay.classList.remove("selected");
+          }
+
+          // Aggiungi la classe 'selected' al giorno cliccato
+          e.target.classList.add("selected");
+
+          const clickedDate = new Date(e.target.getAttribute('data-date'));
+          if (normalizeDate(clickedDate).getTime() === normalizeDate(new Date()).getTime()) {
+            eventsTodayTitle.textContent = "Eventi di Oggi"; // Se è il giorno odierno, mostra "Eventi di oggi"
+          } else {
+            eventsTodayTitle.textContent = `Eventi di ${clickedDate.toLocaleDateString('it-IT', { weekday: 'long' })}`;
+          }
+          recuperaEventi(clickedDate);
+        }
+      });
+
+      // Pre-seleziona il giorno odierno
+      preSelectToday();
+    }
+
+    // Aggiungi evento per tutto il widget tranne che sui giorni
+    document.body.addEventListener("click", (e) => {
+      // Verifica che l'elemento cliccato non sia un giorno della settimana
+      if (!e.target.classList.contains("week-day")) {
+        window.location.href = "calendario.html";  // Reindirizza a calendario.html
+      }
+    });
+  });
+</script>
+
+
+
+
