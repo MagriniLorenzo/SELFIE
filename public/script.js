@@ -57,11 +57,11 @@ const months = [
 
 let eventsArr = []; 
 
-function fetchEvents() {
+async function fetchEvents() {
   return fetch("http://localhost:3000/events")
-    .then((response) => response.json())
+    .then((response) => response.text())
     .then((data) => {
-      eventsArr = data; // Popola l'array eventsArr con i dati
+      eventsArr = JSON.parse(data); // Popola l'array eventsArr con i dati
       console.log(eventsArr); // Mostra gli eventi ricevuti
     })
     .catch((error) => {
@@ -244,7 +244,7 @@ function gotoDate() {
   alert("Invalid Date");
 }
 
-//function get active day day name and date and update eventday eventdate
+//function get active day name and date and update eventday eventdate
 function getActiveDay(date) {
   const day = new Date(year, month, date);
   
@@ -361,11 +361,11 @@ addEventTo.addEventListener("input", (e) => {
 });
 
 //function to add event to eventsArr
-addEventSubmit.addEventListener("click", () => {
+addEventSubmit.addEventListener("click", async () => {
   const eventTitle = addEventTitle.value;
   const eventTimeFrom = addEventFrom.value;
   const eventTimeTo = addEventTo.value;
-  
+
   if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "") {
     alert("Please fill all the fields");
     return;
@@ -375,12 +375,12 @@ addEventSubmit.addEventListener("click", () => {
   const timeFromArr = eventTimeFrom.split(":");
   const timeToArr = eventTimeTo.split(":");
   if (
-    timeFromArr.length !== 2 ||
-    timeToArr.length !== 2 ||
-    timeFromArr[0] > 23 ||
-    timeFromArr[1] > 59 ||
-    timeToArr[0] > 23 ||
-    timeToArr[1] > 59
+      timeFromArr.length !== 2 ||
+      timeToArr.length !== 2 ||
+      timeFromArr[0] > 23 ||
+      timeFromArr[1] > 59 ||
+      timeToArr[0] > 23 ||
+      timeToArr[1] > 59
   ) {
     alert("Invalid Time Format");
     return;
@@ -391,51 +391,48 @@ addEventSubmit.addEventListener("click", () => {
 
   const newEvent = {
     title: eventTitle,
-    time: timeFrom + " - " + timeTo,
+    time: `${timeFrom} - ${timeTo}`,
     day: activeDay,
     month: month + 1,
     year: year,
   };
 
-  // Invio dell'evento al server tramite fetch
-  fetch("http://localhost:3000/events", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify([newEvent]), // L'API si aspetta un array di eventi
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Errore durante il salvataggio dell'evento");
-      }
-      return response.text();
-    })
-    .then((data) => {
-      console.log(data); // Messaggio di successo dal server
-      alert("Evento salvato con successo!");
-
-      // Reset dei campi di input
-      addEventTitle.value = "";
-      addEventFrom.value = "";
-      addEventTo.value = "";
-      addEventWrapper.classList.remove("active");
-
-      // Aggiorna la UI chiamando immediatamente updateEvents per il giorno attivo
-      fetchEvents().then(() => {
-        updateEvents(activeDay); // Mostra gli eventi aggiornati
-      });
-
-      // Aggiungi classe "event" al giorno attivo
-      const activeDayEl = document.querySelector(".day.active");
-      if (!activeDayEl.classList.contains("event")) {
-        activeDayEl.classList.add("event");
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      alert("Errore durante il salvataggio dell'evento");
+  try {
+    // Invia l'evento al server
+    const response = await fetch("http://localhost:3000/events", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify([newEvent]), // L'API si aspetta un array di eventi
     });
+
+    if (!response.ok) {
+      throw new Error("Errore durante il salvataggio dell'evento");
+    }
+
+    const data = await response.text(); // Leggi la risposta come testo
+    console.log(data);
+
+    // Reset dei campi di input
+    addEventTitle.value = "";
+    addEventFrom.value = "";
+    addEventTo.value = "";
+    addEventWrapper.classList.remove("active");
+
+    // Aggiorna la UI
+    await fetchEvents(); // Aspetta il completamento di fetchEvents
+    updateEvents(activeDay);
+
+    // Aggiungi classe "event" al giorno attivo
+    const activeDayEl = document.querySelector(".day.active");
+    if (activeDayEl && !activeDayEl.classList.contains("event")) {
+      activeDayEl.classList.add("event");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Errore durante il salvataggio dell'evento");
+  }
 });
 
 
@@ -483,8 +480,6 @@ eventsContainer.addEventListener("click", (e) => {
             if (!eventsArr.some((event) => event.day === activeDay)) {
               activeDayEl.classList.remove("event");
             }
-
-            alert("Evento eliminato con successo!");
           })
           .catch((error) => {
             console.error(error);

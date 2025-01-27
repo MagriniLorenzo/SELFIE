@@ -8,7 +8,7 @@ const app = express();
 const PORT = 3000;
 const FILE_PATH = "./events.json";
 const NOTES_FILE_PATH = "./notes.json";
-
+const { getEventsFromDB, addEventOnDB, deleteEventOnDB } = require("./DBOperations");
 
 
 // Middleware
@@ -18,15 +18,15 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Endpoint per ottenere eventi
 app.get("/events", (req, res) => {
-    fs.readFile(FILE_PATH, "utf8", (err, data) => {
-        if (err && err.code !== "ENOENT") {
-            return res.status(500).send("Errore nella lettura del file");
-        }
+    getEventsFromDB()
+        .then((events) => {
+            // Se il file non esiste o è vuoto, restituisci un array vuoto
+            events = events ? events : [];
 
-        // Se il file non esiste o è vuoto, restituisci un array vuoto
-        const events = data ? JSON.parse(data) : [];
-        res.json(events);
-    });
+            res.json(events);})
+        .catch((error) => {
+            return res.status(500).send("Errore nella lettura dei dati");
+        });
 });
 
 // Endpoint per salvare eventi
@@ -37,60 +37,36 @@ app.post("/events", (req, res) => {
         return res.status(400).send("Il formato dei dati deve essere un array di eventi.");
     }
 
-    fs.readFile(FILE_PATH, "utf8", (err, data) => {
-        if (err && err.code !== "ENOENT") {
-            return res.status(500).send("Errore nella lettura del file");
-        }
-
-        const existingEvents = data ? JSON.parse(data) : [];
-        const updatedEvents = [...existingEvents, ...newEvents];
-
-        fs.writeFile(FILE_PATH, JSON.stringify(updatedEvents, null, 2), (err) => {
-            if (err) {
-                return res.status(500).send("Errore nella scrittura del file");
-            }
-            res.send("Eventi salvati con successo");
-        });
-    });
+    for(let e of newEvents) {
+        addEventOnDB(e)
+            .then((events) => {
+                return res.status(200).send(events);
+            })
+            .catch((error) => {
+                return res.status(500).send(`Errore nella scrittura dell'evento ${error}`);
+            });
+    }
 });
 
 // Endpoint per eliminare un evento
-app.delete("/events", (req, res) => {
-    const { title, day, month, year } = req.body; // Parametri dell'evento da eliminare
+app.delete("/events", async (req, res) => {
+    const { title, day, month, year, _id } = req.body; // Parametri dell'evento da eliminare
 
-    if (!title || !day || !month || !year) {
-        return res.status(400).send("I parametri 'title', 'day', 'month' e 'year' sono obbligatori.");
+    if (!title || !day || !month || !year || !_id) {
+        return res.status(400).send("I parametri 'title', 'day', 'month', 'year' e '_id' sono obbligatori.");
     }
 
-    fs.readFile(FILE_PATH, "utf8", (err, data) => {
-        if (err && err.code !== "ENOENT") {
-            return res.status(500).send("Errore nella lettura del file");
-        }
-
-        const existingEvents = data ? JSON.parse(data) : [];
-
-        // Filtra gli eventi che non corrispondono a quelli da eliminare
-        const updatedEvents = existingEvents.filter(
-            (event) =>
-                event.title !== title ||
-                event.day !== day ||
-                event.month !== month ||
-                event.year !== year
-        );
-
-        // Se non è stato trovato nessun evento corrispondente
-        if (existingEvents.length === updatedEvents.length) {
-            return res.status(404).send("Evento non trovato.");
-        }
-
-        // Scrivi il file con gli eventi aggiornati
-        fs.writeFile(FILE_PATH, JSON.stringify(updatedEvents, null, 2), (err) => {
-            if (err) {
-                return res.status(500).send("Errore nella scrittura del file");
+    await deleteEventOnDB(_id)
+        .then((events) => {
+            if(events===1){
+                return res.status(200).json({ message: "Evento eliminato con successo" });
+            }else {
+                return res.status(400).send(`l'evento ${_id} non esiste`);
             }
-            res.send("Evento eliminato con successo");
+        })
+        .catch((error) => {
+            return res.status(500).send(`Errore nell'eliminazione dell'evento ${error}`);
         });
-    });
 });
 
 
