@@ -44,6 +44,16 @@
 .current-week h1, .events-today h2 {
   font-size: 20px;
   color: #333;
+  text-align: center;
+}
+
+.events-today {
+  font-size: 17px;
+  text-align: center;
+}
+
+.current-week {
+  margin-bottom: 16px;
 }
 
 .week-days {
@@ -147,11 +157,17 @@
 
     function displayCurrentWeek() {
       const dataCorrente = new Date();
-      const formattedDate = dataCorrente.toLocaleDateString('it-IT', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      // Formattazione solo per mese e anno
+      let formattedDate = dataCorrente.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+      // Forzare la maiuscola sulla prima lettera
+      formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+      
       if (currentWeek) {
-        currentWeek.textContent = `Settimana di: ${formattedDate}`;
+        currentWeek.textContent = `${formattedDate}`;
       }
     }
+
+
 
     function recuperaEventi(data) {
       fetch("http://localhost:3000/events")
@@ -180,7 +196,7 @@
       const today = weekDaysContainer.querySelector(".today");
       if (today) {
         today.classList.add("selected");
-        eventsTodayTitle.textContent = "Eventi di oggi"; // Imposta il titolo come "Eventi di oggi"
+        eventsTodayTitle.textContent = "Eventi di Oggi"; // Imposta il titolo come "Eventi di oggi"
         recuperaEventi(new Date()); // Mostra gli eventi di oggi
       }
     };
@@ -201,7 +217,7 @@
           if (normalizeDate(clickedDate).getTime() === normalizeDate(new Date()).getTime()) {
             eventsTodayTitle.textContent = "Eventi di Oggi"; // Se è il giorno odierno, mostra "Eventi di oggi"
           } else {
-            eventsTodayTitle.textContent = `Eventi di ${clickedDate.toLocaleDateString('it-IT', { weekday: 'long' })}`;
+            eventsTodayTitle.textContent = `Eventi di ${clickedDate.toLocaleDateString('it-IT', { weekday: 'long' }).charAt(0).toUpperCase() + clickedDate.toLocaleDateString('it-IT', { weekday: 'long' }).slice(1)}`;
           }
           recuperaEventi(clickedDate);
         }
