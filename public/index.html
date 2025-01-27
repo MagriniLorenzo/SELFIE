@@ -3,161 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calendario e Note Widget</title>
+  <title>Weekly Events Widget</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="widgets-container">
-    <!-- Widget del Calendario -->
-    <div class="widget-container calendar-widget" id="widget-calendar">
-      <div class="current-week">
-        <h1 id="current-week"></h1>
-      </div>
-      <div class="week-days"></div>
-      <div class="events-today">
-        <h2 id="events-today-title">Eventi di Oggi</h2>
-        <ul id="events-list"></ul>
-      </div>
+  <div class="widget-container calendar-widget" id="widget">
+    <div class="current-week">
+      <h1 id="current-week"></h1>
     </div>
-
-    <!-- Widget delle Note -->
-    <div class="widget-container notes-widget" id="widget-notes">
-      <div class="notes-header">
-        <h1>Note</h1>
-      </div>
-      <div class="notes-content">
-        <ul id="notes-list"></ul>
-      </div>
+    <div class="week-days"></div>
+    <div class="events-today">
+      <h2 id="events-today-title">Eventi di Oggi</h2>
+      <ul id="events-list"></ul>
     </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
 
 <style>
   body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
 
-  .widgets-container {
-    display: flex;
-    gap: 20px;
-  }
+.widget-container {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  width: 350px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-  .widget-container {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    width: 350px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    cursor: pointer; /* Imposta il cursore a mano per l'intero widget */
-  }
+.current-week h1, .events-today h2 {
+  font-size: 20px;
+  color: #333;
+  text-align: center;
+}
 
-  .current-week h1, .events-today h2, .notes-header h1 {
-    font-size: 20px;
-    color: #333;
-    text-align: center;
-  }
+.events-today {
+  font-size: 17px;
+  text-align: center;
+}
 
-  .events-today {
-    font-size: 17px;
-    text-align: center;
-  }
+.current-week {
+  margin-bottom: 16px;
+}
 
-  .current-week {
-    margin-bottom: 16px;
-  }
+.week-days {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
 
-  .week-days {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
+.week-days div {
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  text-align: center;
+}
 
-  .week-days div {
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    text-align: center;
-  }
+.week-days div:hover {
+  background-color: #f0f0f0;
+}
 
-  .week-days div:hover {
-    background-color: #f0f0f0;
-  }
+.week-day.today:hover {
+  background-color: #f0f0f0;
+}
 
-  .week-day.today:hover {
-    background-color: #f0f0f0;
-  }
+#events-list {
+  list-style: none;
+  padding: 0;
+}
 
-  #events-list {
-    list-style: none;
-    padding: 0;
-  }
-
-  #events-list li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    color: #333;
-  }
-
-  #events-list li:last-child {
-    border-bottom: none;
-  }
-
-  .week-day.today {
-    color: red;
-    font-weight: bold;
-  }
-
-  .week-day.selected.today {
-    background-color: lightblue;
-    color: red;
-    border-radius: 5px;
-  }
-
-  .week-day.selected:not(.today) {
-    background-color: lightblue;
-    color: white;
-    border-radius: 5px;
-  }
-
-  .notes-widget .notes-content {
-    margin-top: 20px;
-  }
-
-  .notes-widget ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .notes-widget li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-  }
-
-  .notes-widget li:last-child {
-    border-bottom: none;
-  }
-
-  .notes-widget li {
+#events-list li {
   padding: 10px;
   border-bottom: 1px solid #ddd;
-  color: #555; /* Grigio scuro per il testo */
-  font-size: 14px;
+  color: #333;
 }
 
-.notes-widget li strong {
-  color: #333; /* Un colore più scuro per il titolo */
-  font-size: 17px;
+#events-list li:last-child {
+  border-bottom: none;
 }
+
+/* Giorno odierno: mantiene il colore rosso */
+.week-day.today {
+  color: red;
+  font-weight: bold;
+}
+
+/* Giorno selezionato: mantiene il colore rosso se è il giorno odierno */
+.week-day.selected.today {
+  background-color: lightblue;  /* Colore di sfondo per il giorno selezionato */
+  color: red;  /* Mantiene il colore rosso del testo per il giorno odierno selezionato */
+  border-radius: 5px; /* Per rendere l'angolo del giorno selezionato arrotondato */
+}
+
+/* Giorno selezionato (non odierno): cambia il colore del testo a bianco */
+.week-day.selected:not(.today) {
+  background-color: lightblue;  /* Colore di sfondo per il giorno selezionato */
+  color: white;  /* Colore del testo */
+  border-radius: 5px; /* Per rendere l'angolo del giorno selezionato arrotondato */
+}
+
+
+.widget-container {
+  cursor: pointer; /* Imposta il cursore a mano per l'intero widget */
+}
+
+
+
 </style>
 
 <script>
@@ -166,7 +127,6 @@
     const currentWeek = document.getElementById("current-week");
     const weekDaysContainer = document.querySelector(".week-days");
     const eventsTodayTitle = document.getElementById("events-today-title");
-    const notesList = document.getElementById("notes-list");
 
     function normalizeDate(date) {
       return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -197,12 +157,17 @@
 
     function displayCurrentWeek() {
       const dataCorrente = new Date();
+      // Formattazione solo per mese e anno
       let formattedDate = dataCorrente.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+      // Forzare la maiuscola sulla prima lettera
       formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+      
       if (currentWeek) {
         currentWeek.textContent = `${formattedDate}`;
       }
     }
+
+
 
     function recuperaEventi(data) {
       fetch("http://localhost:3000/events")
@@ -222,84 +187,56 @@
         .catch(console.error);
     }
 
-    function recuperaNote() {
-  fetch("http://localhost:3000/notes")
-    .then(res => res.json())
-    .then(dati => {
-      if (notesList) {
-        notesList.innerHTML = dati.length 
-          ? dati.map(nota => {
-              const maxLength = 50; // Lunghezza massima dell'estratto
-              let contentPreview = nota.content;
-              
-              if (nota.content.length > maxLength) {
-                const truncated = nota.content.substring(0, maxLength);
-                const lastSpaceIndex = truncated.lastIndexOf(' ');
-                contentPreview = truncated.substring(0, lastSpaceIndex) + '...';
-              }
-
-              return `<li>
-                        <strong>${nota.title}</strong>: ${contentPreview}
-                      </li>`;
-            }).join('')
-          : '<li>Nessuna nota disponibile!</li>';
-      }
-    })
-    .catch(console.error);
-}
-
-
-
-
-
     displayWeekDays();
     displayCurrentWeek();
     recuperaEventi(new Date());
-    recuperaNote();
 
+    // Pre-seleziona il giorno odierno
     const preSelectToday = () => {
       const today = weekDaysContainer.querySelector(".today");
       if (today) {
         today.classList.add("selected");
-        eventsTodayTitle.textContent = "Eventi di Oggi";
-        recuperaEventi(new Date());
+        eventsTodayTitle.textContent = "Eventi di Oggi"; // Imposta il titolo come "Eventi di oggi"
+        recuperaEventi(new Date()); // Mostra gli eventi di oggi
       }
     };
 
     if (weekDaysContainer) {
       weekDaysContainer.addEventListener("click", (e) => {
         if (e.target.classList.contains("week-day")) {
+          // Rimuovi la classe 'selected' da tutti i giorni
           const selectedDay = weekDaysContainer.querySelector(".week-day.selected");
           if (selectedDay) {
             selectedDay.classList.remove("selected");
           }
+
+          // Aggiungi la classe 'selected' al giorno cliccato
           e.target.classList.add("selected");
 
           const clickedDate = new Date(e.target.getAttribute('data-date'));
           if (normalizeDate(clickedDate).getTime() === normalizeDate(new Date()).getTime()) {
-            eventsTodayTitle.textContent = "Eventi di Oggi";
+            eventsTodayTitle.textContent = "Eventi di Oggi"; // Se è il giorno odierno, mostra "Eventi di oggi"
           } else {
             eventsTodayTitle.textContent = `Eventi di ${clickedDate.toLocaleDateString('it-IT', { weekday: 'long' }).charAt(0).toUpperCase() + clickedDate.toLocaleDateString('it-IT', { weekday: 'long' }).slice(1)}`;
           }
           recuperaEventi(clickedDate);
         }
       });
+
+      // Pre-seleziona il giorno odierno
       preSelectToday();
     }
 
-    // Aggiungi evento per tutto il widget calendar-widget tranne che sui giorni
-    document.querySelector(".calendar-widget").addEventListener("click", (e) => {
+    // Aggiungi evento per tutto il widget tranne che sui giorni
+    document.body.addEventListener("click", (e) => {
       // Verifica che l'elemento cliccato non sia un giorno della settimana
       if (!e.target.classList.contains("week-day")) {
         window.location.href = "calendario.html";  // Reindirizza a calendario.html
       }
     });
-
-    // Aggiungi evento per tutto il widget calendar-widget tranne che sui giorni
-    document.querySelector(".notes-widget").addEventListener("click", (e) => {
-      window.location.href = "note.html";  // Reindirizza a calendario.html
-      
-    });
-
   });
 </script>
+
+
+
+
