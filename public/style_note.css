@@ -1,0 +1,205 @@
+/* Reset di base per una visualizzazione coerente su tutti i browser */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Corpo principale della pagina */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Contenitore principale delle note */
+.notes-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 600px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+
+/* Titolo della pagina */
+.notes-container h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Lista delle note */
+.notes-list {
+    margin-top: 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.note {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin: 10px 0;
+    padding: 15px;
+    text-align: left;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.note h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.note p {
+    font-size: 14px;
+    color: #666;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Pulsante per aggiungere una nota */
+.add-note-btn {
+    background-color: #008CBA;
+    font-size: 16px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.add-note-btn:hover {
+    background-color: #006f8c;
+}
+
+/* Modulo di aggiunta/modifica della nota */
+.add-note-wrapper {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.add-note-wrapper.active {
+    display: flex;
+}
+
+.add-note-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.add-note-form h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.add-note-form label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+.add-note-form input,
+.add-note-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.add-note-form input:focus,
+.add-note-form textarea:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+.add-note-form textarea {
+    height: 150px;
+}
+
+.add-note-form button {
+    background-color: #4CAF50;
+    width: 100%;
+}
+
+.add-note-form .close-note-btn {
+    background-color: #f44336;
+    margin-top: 10px;
+}
+
+.add-note-form .close-note-btn:hover {
+    background-color: #d32f2f;
+}
+
+.add-note-form button:hover {
+    background-color: #45a049;
+}
+
+button.edit-note-btn,
+button.delete-note-btn {
+    background-color: #ff9800;
+    font-size: 14px;
+    padding: 6px 12px;
+    margin-top: 10px;
+    width: 48%;
+    display: inline-block;
+    margin-right: 4%;
+}
+
+button.edit-note-btn:hover {
+    background-color: #e68900;
+}
+
+button.delete-note-btn {
+    background-color: #f44336;
+}
+
+button.delete-note-btn:hover {
+    background-color: #d32f2f;
+}
+
+@media screen and (max-width: 600px) {
+    .notes-container {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .add-note-form {
+        width: 100%;
+    }
+
+    button.edit-note-btn,
+    button.delete-note-btn {
+        width: 100%;
+        margin-right: 0;
+    }
+}
+
