@@ -6,9 +6,9 @@ const path = require("path");
 
 const app = express();
 const PORT = 3000;
-const FILE_PATH = "./events.json";
+const EVENT_FILE_PATH = "./events.json";
 const NOTES_FILE_PATH = "./notes.json";
-const { getEventsFromDB, addEventOnDB, deleteEventOnDB } = require("./DBOperations");
+const { getEventsFromDB, addEventOnDB, deleteEventOnDB, addAccountOnDB, getAccountFromDB } = require("./DBOperations");
 
 
 // Middleware
@@ -69,20 +69,6 @@ app.delete("/events", async (req, res) => {
         });
 });
 
-
-
-
-
-
-
-
-
-// Middleware per il parsing del corpo delle richieste JSON
-app.use(express.json());
-
-// Abilita CORS per permettere le richieste da altre origini (separato dal server)
-app.use(cors());
-
 // Endpoint per ottenere note
 app.get("/notes", async (req, res) => {
     try {
@@ -96,7 +82,7 @@ app.get("/notes", async (req, res) => {
 });
 
 // Endpoint per salvare note con ID incrementale
-app.post("/notes", (req, res) => {
+app.post("/notes", async (req, res) => {
     const newNote = req.body;
 
     if (!newNote.title || !newNote.content) {
@@ -128,8 +114,7 @@ app.post("/notes", (req, res) => {
     });
 });
 
-
-    // Endpoint per aggiornare una nota
+// Endpoint per aggiornare una nota
 app.put("/notes/:id", async (req, res) => {
     const { id } = req.params;
     const updatedNote = req.body;
@@ -161,8 +146,6 @@ app.put("/notes/:id", async (req, res) => {
     }
 });
 
-
-
 // Endpoint per eliminare una nota
 app.delete("/notes/:id", async (req, res) => {
     const { id } = req.params; // Ottieni l'ID dalla richiesta
@@ -187,19 +170,63 @@ app.delete("/notes/:id", async (req, res) => {
     }
 });
 
+// Endpoint per creare un account
+app.post("/register", (req, res) => {
+    const userData = req.body;
 
+    if (!isNonEmptyJSON(userData)) {
+        return res.status(400).send("Il formato dei dati deve essere un Json non vuoto.");
+    }
 
+    addAccountOnDB(userData)
+        .then((events) => {
+            if(events===1)
+                return res.status(200).send(events);
+            else {
+                return res.status(400).send("Errore, il nome utente che hai inserito esiste già");
+            }
+        })
+        .catch((error) => {
+            return res.status(500).send(`Errore nella creazione dell'account ${error}`);
+        });
+});
 
+// Endpoint per login
+app.post("/login", (req, res) => {
+    const userData = req.body;
 
+    if (!isNonEmptyJSON(userData)) {
+        return res.status(400).send("Il formato dei dati deve essere un Json non vuoto.");
+    }
 
-
+    getAccountFromDB(userData)
+        .then((events) => {
+            if(events===1)
+                return res.status(200).send(events);
+            else {
+                return res.status(400).send("Errore, il nome utente che hai inserito non esiste o non ha la password indicata");
+            }
+        })
+        .catch((error) => {
+            return res.status(500).send(`Errore durante il login ${error}`);
+        });
+});
 
 // Endpoint per servire la pagina principale
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    const filePath = path.join(__dirname, "public", "login.html");
+    res.sendFile(filePath);
 });
 
 // Avvio del server
 app.listen(PORT, () => {
     console.log(`Server in esecuzione su http://localhost:${PORT}`);
 });
+
+
+function isNonEmptyJSON(variable) {
+    return typeof variable === 'object' &&
+        variable !== null &&
+        !Array.isArray(variable) &&
+        Object.keys(variable).length > 0;
+}
