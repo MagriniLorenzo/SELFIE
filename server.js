@@ -85,8 +85,8 @@ app.get("/notes", async (req, res) => {
 app.post("/notes", async (req, res) => {
     const newNote = req.body;
 
-    if (!newNote.title || !newNote.content) {
-        return res.status(400).send("Il formato dei dati deve contenere 'title' e 'content'.");
+    if (!newNote.title || !newNote.content || !newNote.categories) {
+        return res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
     }
 
     fs.readFile(NOTES_FILE_PATH, "utf8", (err, data) => {
@@ -95,21 +95,22 @@ app.post("/notes", async (req, res) => {
         }
 
         const existingNotes = data ? JSON.parse(data) : [];
-        // Calcola il nuovo ID come uno più grande dell'ID più alto attualmente esistente
         const newId = existingNotes.length > 0 ? Math.max(...existingNotes.map(note => note.id)) + 1 : 1;
-        
-        // Aggiungi l'ID alla nuova nota
-        const noteWithId = { ...newNote, id: newId };
 
-        // Aggiungi la nota alla lista delle note
+        const noteWithId = {
+            ...newNote,
+            id: newId,
+            createdAt: new Date().toLocaleDateString("it-IT"),
+            updatedAt: new Date().toLocaleDateString("it-IT")
+        };
+
         existingNotes.push(noteWithId);
 
-        // Salva le note aggiornate nel file
         fs.writeFile(NOTES_FILE_PATH, JSON.stringify(existingNotes, null, 2), (err) => {
             if (err) {
                 return res.status(500).send("Errore nella scrittura del file delle note");
             }
-            res.json(noteWithId); // Restituisci la nuova nota con l'ID assegnato
+            res.json(noteWithId);
         });
     });
 });
@@ -119,8 +120,8 @@ app.put("/notes/:id", async (req, res) => {
     const { id } = req.params;
     const updatedNote = req.body;
 
-    if (!updatedNote.title || !updatedNote.content) {
-        return res.status(400).send("Il formato dei dati deve contenere 'title' e 'content'.");
+    if (!updatedNote.title || !updatedNote.content || !updatedNote.categories) {
+        return res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
     }
 
     try {
@@ -132,13 +133,13 @@ app.put("/notes/:id", async (req, res) => {
             return res.status(404).send("Nota non trovata.");
         }
 
-        // Aggiorna la nota con i nuovi dati
-        existingNotes[noteIndex] = { ...existingNotes[noteIndex], ...updatedNote };
+        existingNotes[noteIndex] = {
+            ...existingNotes[noteIndex],
+            ...updatedNote,
+            updatedAt: new Date().toLocaleDateString("it-IT") // Aggiorna la data di ultima modifica
+        };
 
-        // Scrive i dati aggiornati nel file
         await fs.promises.writeFile(NOTES_FILE_PATH, JSON.stringify(existingNotes, null, 2));
-
-        // Restituisce l'array aggiornato delle note
         res.json(existingNotes);
     } catch (err) {
         console.error(err);

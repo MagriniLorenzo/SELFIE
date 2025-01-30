@@ -1,17 +1,12 @@
 [
   {
-    "title": "abcd",
-    "content": "cane",
-    "id": 1
-  },
-  {
-    "title": "Ciao",
-    "content": "blablabla",
+    "title": "Banana",
+    "categories": [
+      "adasdad"
+    ],
+    "content": "asdsadasdsad",
+    "createdAt": "30/01/2025",
+    "updatedAt": "30/01/2025",
     "id": 2
-  },
-  {
-    "title": "Prova",
-    "content": "Prova",
-    "id": 3
   }
 ]

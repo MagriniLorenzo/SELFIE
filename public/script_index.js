@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
         weekDaysContainer.innerHTML = weekDays.map(day => {
             const dayName = day.toLocaleDateString('it-IT', { weekday: 'short' });
             const isToday = normalizeDate(day).getTime() === normalizeDate(dataCorrente).getTime();
-            return `<div class="week-day ${isToday ? 'today' : ''}" data-date="${day.toISOString()}">${dayName} ${day.getDate()}</div>`;
+            return `<div class="week-day ${isToday ? 'today' : ''}" data-date="${day.toLocaleDateString("it-IT")}">${dayName} ${day.getDate()}</div>`;
         }).join('');
     }
 
@@ -134,7 +134,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Aggiungi evento per tutto il widget calendar-widget tranne che sui giorni
     document.querySelector(".notes-widget").addEventListener("click", (e) => {
-        window.location.href = "note.html";  // Reindirizza a calendario.html
+        window.location.href = "note.html"; 
+
+    });
+
+    document.querySelector(".timer-widget").addEventListener("click", (e) => {
+        window.location.href = "timer.html"; 
 
     });
 
