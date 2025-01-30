@@ -192,3 +192,21 @@ document.addEventListener("DOMContentLoaded", () => {
         submitNoteBtn.addEventListener("click", addNote);
     }
 });
+
+    
+function filterEntries() {
+    var searchTerm = document.getElementById("search").value.toLowerCase();
+    var entries = document.querySelectorAll(".note");
+
+        
+    entries.forEach(function(entry) {
+            
+        var titolo = entry.querySelector(".note-title").textContent.toLowerCase();
+            
+        if (titolo.includes(searchTerm)) {
+            entry.style.display = "";
+        } else {
+            entry.style.display = "none";
+        }
+    });
+}
