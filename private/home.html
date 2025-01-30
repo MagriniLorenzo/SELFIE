@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/private/style_home.css">
+  <script src="/private/script_home.js"></script>
+  <title>Calendario e Note Widget</title>
+</head>
+<body>
+<div class="widgets-container">
+  <!-- Widget del Calendario -->
+  <div class="widget-container calendar-widget" id="widget-calendar">
+    <div class="current-week">
+      <h1 id="current-week"></h1>
+    </div>
+    <div class="week-days"></div>
+    <div class="events-today">
+      <h2 id="events-today-title">Eventi di Oggi</h2>
+      <ul id="events-list"></ul>
+    </div>
+  </div>
+
+  <!-- Widget delle Note -->
+  <div class="widget-container notes-widget" id="widget-notes">
+    <div class="notes-header">
+      <h1>Note</h1>
+    </div>
+    <div class="notes-content">
+      <ul id="notes-list"></ul>
+    </div>
+  </div>
+
+  <div class="widget-container timer-widget" id="widget-timer">
+    <div class="timer-header">
+      <h1>Pomodoro Timer</h1>
+    </div>
+    <div class="timer-content">
+      <img src="image/timer.png">
+    </div>
+  </div>
+</div>
+</body>
+</html>

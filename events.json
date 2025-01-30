@@ -1,73 +1,50 @@
-[
-  {
-    "title": "Aperitivo con gli amici",
-    "description": "Un aperitivo con gli amici questo venerdì sera.",
-    "time": "7:00 PM - 9:00 PM",
-    "day": 26,
-    "month": 1,
-    "year": 2025,
-    "repeats": false
+[{
+  "_id": {
+    "$oid": "6797a4aeac3d1a1e70b3f378"
   },
-  {
-    "title": "Calcetto settimanale",
-    "description": "Partita di calcetto ogni martedì sera.",
-    "time": "8:00 PM - 9:30 PM",
-    "day": 30,
-    "month": 1,
-    "year": 2025,
-    "repeats": true,
-    "frequency": "weekly",
-    "repeatUntil": "2025-12-31"
+  "title": "Prova",
+  "time": "7:00 PM - 9:00 PM",
+  "day": 18,
+  "month": 12,
+  "year": 2024
+},
+{
+  "_id": {
+    "$oid": "6797a4aeac3d1a1e70b3f379"
   },
-  {
-    "title": "Appello di TW",
-    "description": "Appello di Tecnologie Web.",
-    "time": "11:00 AM - 1:00 PM",
-    "day": 12,
-    "month": 6,
-    "year": 2025,
-    "repeats": false
+  "title": "Prova",
+  "time": "12:00 PM - 1:00 PM",
+  "day": 20,
+  "month": 12,
+  "year": 2024
+},
+{
+  "_id": {
+    "$oid": "679b5892252d73a765cdfbaa"
   },
-  {
-    "title": "Studio teoria del progetto",
-    "description": "Studio della teoria del progetto.",
-    "start": "2025-05-10",
-    "end": "2025-05-21",
-    "time": "All day",
-    "repeats": false
+  "title": "evento bello",
+  "time": "11:11 AM - 10:22 PM",
+  "day": 30,
+  "month": 1,
+  "year": 2025
+},
+{
+  "_id": {
+    "$oid": "679b68dc51fa8e3532ee4633"
   },
-  {
-    "title": "Preparazione progetto",
-    "description": "Lavoro sulla preparazione del progetto.",
-    "start": "2025-05-22",
-    "end": "2025-06-05",
-    "time": "All day",
-    "repeats": false
+  "title": "calcio",
+  "time": "11:11 AM - 10:22 PM",
+  "day": 31,
+  "month": 1,
+  "year": 2025
+},
+{
+  "_id": {
+    "$oid": "679b69b5027bc81a9bb3a36b"
   },
-  {
-    "title": "Demo con il gruppo",
-    "description": "Demo con i compagni di gruppo per il progetto di TW.",
-    "time": "7:00 PM - 9:00 PM",
-    "day": 6,
-    "month": 6,
-    "year": 2025,
-    "repeats": false
-  },
-  {
-    "title": "Debug e studio",
-    "description": "Debug del progetto e studio per l'esame scritto.",
-    "start": "2025-06-07",
-    "end": "2025-06-11",
-    "time": "All day",
-    "repeats": false
-  },
-  {
-    "title": "Esame scritto di TW",
-    "description": "Esame scritto del corso di Tecnologie Web.",
-    "time": "11:00 AM - 2:00 PM",
-    "day": 12,
-    "month": 6,
-    "year": 2025,
-    "repeats": false
-  }
-]
+  "title": "bho",
+  "time": "11:11 AM - 11:12 AM",
+  "day": 17,
+  "month": 1,
+  "year": 2025
+}]

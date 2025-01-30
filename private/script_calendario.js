@@ -56,25 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
   defineProperty();
 });
 
-// const eventsArr = [
-//   {
-//     day: 13,
-//     month: 11,
-//     year: 2022,
-//     events: [
-//       {
-//         title: "Event 1 lorem ipsun dolar sit genfa tersd dsad ",
-//         time: "10:00 AM",
-//       },
-//       {
-//         title: "Event 2",
-//         time: "11:00 AM",
-//       },
-//     ],
-//   },
-// ];
-
-
 async function fetchEvents() {
   return fetch("http://localhost:3000/events")
     .then((response) => response.text())
@@ -424,7 +405,7 @@ function addEvent() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify([newEvent]), // L'API si aspetta un array di eventi
+        body: JSON.stringify(newEvent), // L'API si aspetta un array di eventi
       });
 
       if (!response.ok) {

@@ -34,7 +34,7 @@ function displayNotes() {
     notesArr.forEach((note) => {
         const noteElement = document.createElement("div");
         noteElement.classList.add("note");
-        noteElement.setAttribute("data-id", note.id);
+        noteElement.setAttribute("data-id", note._id);
         noteElement.innerHTML = `
             <div class="nota">
                 <div class="content">
@@ -46,8 +46,8 @@ function displayNotes() {
                 <div class="dropdown">
                     <button class="dropdown-toggle">&#8226;&#8226;&#8226;</button>
                     <div class="dropdown-menu hidden">
-                        <button class="edit-note-btn" data-id="${note.id}">Modifica</button>
-                        <button class="delete-note-btn" data-id="${note.id}">Elimina</button>
+                        <button class="edit-note-btn" data-id="${note._id}">Modifica</button>
+                        <button class="delete-note-btn" data-id="${note._id}">Elimina</button>
                     </div>
                 </div>
             </div>`;
@@ -89,22 +89,24 @@ async function addNote() {
 
 // Funzione per modificare una nota
 function editNote(index) {
-    const noteToEdit = notesArr[index];
-    noteTitleInput.value = noteToEdit.title;
-    noteContentInput.innerHTML = noteToEdit.content;
-    noteCategoriesInput.value = noteToEdit.categories;
+        const noteToEdit = notesArr[index];
+        noteTitleInput.value = noteToEdit.title;
+        noteContentInput.innerHTML = noteToEdit.content;
+        noteCategoriesInput.value = noteToEdit.categories;
 
-    // Rimuovi TUTTI gli event listener esistenti
-    const cloneSubmitNoteBtn = submitNoteBtn.cloneNode(true);
-    submitNoteBtn.parentNode.replaceChild(cloneSubmitNoteBtn, submitNoteBtn);
-    submitNoteBtn = cloneSubmitNoteBtn;
+        // Rimuovi TUTTI gli event listener esistenti
+        const cloneSubmitNoteBtn = submitNoteBtn.cloneNode(true);
+        submitNoteBtn.parentNode.replaceChild(cloneSubmitNoteBtn, submitNoteBtn);
+        submitNoteBtn = cloneSubmitNoteBtn;
 
-    // Aggiungi l'event listener per aggiornare la nota
+        // Aggiungi l'event listener per aggiornare la nota
+    submitNoteBtn.removeEventListener("click", addNote);
     submitNoteBtn.addEventListener("click", () => updateNote(index));
 
-    // Mostra il form di modifica
-    addNoteWrapper.classList.add("active");
+        // Mostra il form di modifica
+        addNoteWrapper.classList.add("active");
 }
+
 
 // Funzione per aggiornare una nota usando Axios
 async function updateNote(index) {
@@ -116,15 +118,20 @@ async function updateNote(index) {
     };
 
     try {
-        const response = await axios.put(`http://localhost:3000/notes/${notesArr[index].id}`, updatedNote);
-        const updatedNotes = response.data;
+        // Effettua la richiesta PUT per aggiornare la nota
+        const response = await axios.put(`http://localhost:3000/notes/${notesArr[index]._id}`, updatedNote);
 
-        const modifiedNote = updatedNotes.find(note => note.id === notesArr[index].id);
-        if (modifiedNote) {
-            notesArr[index] = modifiedNote;
-        }
+        updatedNote._id = notesArr[index]._id;
+        // Aggiorna l'array locale con il nuovo array di note restituito dal server
+        notesArr[index] = updatedNote; // La risposta ora contiene tutte le note aggiornate
 
-        displayNotes();
+        // Verifica l'array delle note aggiornato
+        console.log("Array delle note aggiornato:", notesArr[index]);
+
+        // Rendi visibili le note aggiornate
+        await displayNotes();
+
+        // Resetta i campi del form e nasconde la finestra di modifica
         noteTitleInput.value = "";
         noteCategoriesInput.value = "";
         noteContentInput.innerHTML = "";
@@ -137,13 +144,15 @@ async function updateNote(index) {
 }
 
 // Funzione per eliminare una nota usando Axios
-async function deleteNote(id) {
+async function deleteNote(noteId) {
     try {
-        const noteId = parseInt(id); 
+        // Assicurati che l'ID sia un numero
+        // const noteId = parseInt(id);  // Converte l'ID in un numero
 
         await axios.delete(`http://localhost:3000/notes/${noteId}`);
 
-        notesArr = notesArr.filter((note) => note.id !== noteId);
+        // Rimuove la nota dall'array locale confrontando gli ID come numeri
+        notesArr = notesArr.filter((note) => note._id !== noteId);
 
         console.log("Array dopo l'aggiornamento:", notesArr);
 
@@ -177,7 +186,7 @@ function addEvent() {
     document.addEventListener("click", function (event) {
         if (event.target && event.target.classList.contains("edit-note-btn")) {
             const noteId = event.target.getAttribute("data-id");  // Ottieni l'id della nota
-            const index = notesArr.findIndex(note => note.id === parseInt(noteId)); // Trova l'indice della nota corrispondente
+            const index = notesArr.findIndex(note => note._id === noteId); // Trova l'indice della nota corrispondente
 
             if (index !== -1) {
                 // Chiamata alla funzione per modificare la nota
