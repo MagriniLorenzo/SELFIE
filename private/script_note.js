@@ -1,41 +1,46 @@
 let notesArr = [];
 
+let notesContainer,notesList,addNoteBtn,
+    addNoteWrapper,noteTitleInput,noteContentInput,
+    submitNoteBtn,closeNoteBtn,noteCategoriesInput;
 
 document.addEventListener("DOMContentLoaded", () => {
-    let notesContainer = document.querySelector(".notes-container");
-    let notesList = document.querySelector(".notes-list");
-    let addNoteBtn = document.querySelector(".add-note-btn");
-    let addNoteWrapper = document.querySelector(".add-note-wrapper");
-    let noteTitleInput = document.querySelector(".note-title");
-    let noteContentInput = document.querySelector(".note-content p");
-    let submitNoteBtn = document.querySelector(".submit-note-btn");
-    let closeNoteBtn = document.querySelector(".close-note-btn");
-    let noteCategoriesInput = document.querySelector(".note-categories");
+    notesContainer = document.querySelector(".notes-container");
+    notesList = document.querySelector(".notes-list");
+    addNoteBtn = document.querySelector(".add-note-btn");
+    addNoteWrapper = document.querySelector(".add-note-wrapper");
+    noteTitleInput = document.querySelector(".note-title");
+    noteContentInput = document.querySelector(".note-content p");
+    submitNoteBtn = document.querySelector(".submit-note-btn");
+    closeNoteBtn = document.querySelector(".close-note-btn");
+    noteCategoriesInput = document.querySelector(".note-categories");
+    document.querySelector("#LogOut").addEventListener("click", logOut);
 
     addEvent();
 
     fetchNotes().then(() => {
         displayNotes();
     });
+});
 
-    async function fetchNotes() {
-        try {
-            const response = await axios.get("http://localhost:3000/notes");
-            notesArr = response.data;
-            console.log(response.data);
-        } catch (error) {
-            console.error("Errore:", error);
-        }
+async function fetchNotes() {
+    try {
+        const response = await axios.get("http://localhost:3000/notes");
+        notesArr = response.data;
+        console.log(response.data);
+    } catch (error) {
+        console.error("Errore:", error);
     }
+}
 
-    function displayNotes() {
-        notesList.innerHTML = "";
+function displayNotes() {
+    notesList.innerHTML = "";
 
-        notesArr.forEach((note) => {
-            const noteElement = document.createElement("div");
-            noteElement.classList.add("note");
-            noteElement.setAttribute("data-id", note._id);
-            noteElement.innerHTML = `
+    notesArr.forEach((note) => {
+        const noteElement = document.createElement("div");
+        noteElement.classList.add("note");
+        noteElement.setAttribute("data-id", note._id);
+        noteElement.innerHTML = `
                 <div class="nota">
                     <div class="content">
                         <h3 class="note-title">${note.title}</h3>
@@ -52,151 +57,147 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </div>`;
 
-            const dropdownToggle = noteElement.querySelector(".dropdown-toggle");
-            const dropdownMenu = noteElement.querySelector(".dropdown-menu");
+        const dropdownToggle = noteElement.querySelector(".dropdown-toggle");
+        const dropdownMenu = noteElement.querySelector(".dropdown-menu");
 
-            dropdownToggle.addEventListener("click", () => {
-                dropdownMenu.classList.toggle("hidden");
-            });
-
-            notesList.appendChild(noteElement);
+        dropdownToggle.addEventListener("click", () => {
+            dropdownMenu.classList.toggle("hidden");
         });
-    }
 
-    async function addNote() {
-        const newNote = {
-            title: noteTitleInput.value,
-            categories: noteCategoriesInput.value.split(',').map(cat => cat.trim()),
-            content: noteContentInput.innerHTML,
-            createdAt: new Date().toLocaleDateString("it-IT"),
-            updatedAt: new Date().toLocaleDateString("it-IT")
-        };
+        notesList.appendChild(noteElement);
+    });
+}
 
-        try {
-            const response = await axios.post("http://localhost:3000/notes", newNote);
+async function addNote() {
+    const newNote = {
+        title: noteTitleInput.value,
+        categories: noteCategoriesInput.value.split(',').map(cat => cat.trim()),
+        content: noteContentInput.innerHTML,
+        createdAt: new Date().toLocaleDateString("it-IT"),
+        updatedAt: new Date().toLocaleDateString("it-IT")
+    };
 
-            const savedNote = {
+    try {
+        const response = await axios.post("http://localhost:3000/notes", newNote);
+
+        const savedNote = {
             ...newNote,
             _id: response.data
         };
 
 
-            notesArr.push(savedNote);
+        notesArr.push(savedNote);
 
-            console.log(savedNote);
+        console.log(savedNote);
 
-            displayNotes();
-            resetForm();
-            alert("Nota aggiunta con successo!");
-        } catch (error) {
-            console.error(error);
-            alert("Errore durante l'aggiunta della nota");
-        }
+        displayNotes();
+        resetForm();
+        alert("Nota aggiunta con successo!");
+    } catch (error) {
+        console.error(error);
+        alert("Errore durante l'aggiunta della nota");
     }
+}
 
-    function editNote(index) {
-        const noteToEdit = notesArr[index];
-        noteTitleInput.value = noteToEdit.title;
-        noteContentInput.innerHTML = noteToEdit.content;
-        noteCategoriesInput.value = noteToEdit.categories;
+function editNote(index) {
+    const noteToEdit = notesArr[index];
+    noteTitleInput.value = noteToEdit.title;
+    noteContentInput.innerHTML = noteToEdit.content;
+    noteCategoriesInput.value = noteToEdit.categories;
 
-        // FIX: Imposta la modalità su "edit" e salva l'indice della nota da modificare
-        submitNoteBtn.dataset.mode = "edit";
-        submitNoteBtn.dataset.index = index;
+    // FIX: Imposta la modalità su "edit" e salva l'indice della nota da modificare
+    submitNoteBtn.dataset.mode = "edit";
+    submitNoteBtn.dataset.index = index;
 
-        // FIX: Rimuove tutti gli event listener esistenti e aggiunge solo quello corretto
-        submitNoteBtn.removeEventListener("click", addNote);
-        submitNoteBtn.removeEventListener("click", updateNote);
-        submitNoteBtn.addEventListener("click", updateNote);
+    // FIX: Rimuove tutti gli event listener esistenti e aggiunge solo quello corretto
+    submitNoteBtn.removeEventListener("click", addNote);
+    submitNoteBtn.removeEventListener("click", updateNote);
+    submitNoteBtn.addEventListener("click", updateNote);
 
+    addNoteWrapper.classList.add("active");
+}
+
+async function updateNote() {
+    const index = submitNoteBtn.dataset.index;
+
+    if (index === undefined) return;
+
+    const updatedNote = {
+        title: noteTitleInput.value,
+        categories: noteCategoriesInput.value.split(',').map(cat => cat.trim()),
+        content: noteContentInput.innerHTML,
+        createdAt: notesArr[index].createdAt,
+        updatedAt: new Date().toLocaleDateString("it-IT")
+
+    };
+
+    try {
+        await axios.put(`http://localhost:3000/notes/${notesArr[index]._id}`, updatedNote);
+        updatedNote._id = notesArr[index]._id;
+        notesArr[index] = updatedNote;
+
+        displayNotes();
+        resetForm();
+        alert("Nota aggiornata con successo!");
+    } catch (error) {
+        console.error(error);
+        alert("Errore durante l'aggiornamento della nota");
+    }
+}
+
+async function deleteNote(noteId) {
+    try {
+        await axios.delete(`http://localhost:3000/notes/${noteId}`);
+        notesArr = notesArr.filter((note) => note._id !== noteId);
+        displayNotes();
+        alert("Nota eliminata con successo!");
+    } catch (error) {
+        console.error(error);
+        alert("Errore durante l'eliminazione della nota");
+    }
+}
+
+function addEvent() {
+    addNoteBtn.addEventListener("click", () => {
         addNoteWrapper.classList.add("active");
-    }
 
-    async function updateNote() {
-        const index = submitNoteBtn.dataset.index;
-
-        if (index === undefined) return;
-
-        const updatedNote = {
-            title: noteTitleInput.value,
-            categories: noteCategoriesInput.value.split(',').map(cat => cat.trim()),
-            content: noteContentInput.innerHTML,
-            createdAt: notesArr[index].createdAt,
-            updatedAt: new Date().toLocaleDateString("it-IT")
-
-        };
-
-        try {
-            await axios.put(`http://localhost:3000/notes/${notesArr[index]._id}`, updatedNote);
-            updatedNote._id = notesArr[index]._id;
-            notesArr[index] = updatedNote;
-
-            displayNotes();
-            resetForm();
-            alert("Nota aggiornata con successo!");
-        } catch (error) {
-            console.error(error);
-            alert("Errore durante l'aggiornamento della nota");
-        }
-    }
-
-    async function deleteNote(noteId) {
-        try {
-            await axios.delete(`http://localhost:3000/notes/${noteId}`);
-            notesArr = notesArr.filter((note) => note._id !== noteId);
-            displayNotes();
-            alert("Nota eliminata con successo!");
-        } catch (error) {
-            console.error(error);
-            alert("Errore durante l'eliminazione della nota");
-        }
-    }
-
-    function addEvent() {
-        addNoteBtn.addEventListener("click", () => {
-            addNoteWrapper.classList.add("active");
-
-            // FIX: Imposta la modalità su "add"
-            submitNoteBtn.dataset.mode = "add";
-            submitNoteBtn.removeEventListener("click", updateNote);
-            submitNoteBtn.removeEventListener("click", addNote);
-            submitNoteBtn.addEventListener("click", addNote);
-        });
-
-        closeNoteBtn.addEventListener("click", resetForm);
-
-        document.addEventListener("click", function (event) {
-            if (event.target.classList.contains("edit-note-btn")) {
-                const noteId = event.target.getAttribute("data-id");
-                const index = notesArr.findIndex(note => note._id === noteId);
-                if (index !== -1) editNote(index);
-            }
-        });
-
-        document.addEventListener("click", function (event) {
-            if (event.target.classList.contains("delete-note-btn")) {
-                const noteId = event.target.getAttribute("data-id");
-                if (noteId) deleteNote(noteId);
-            }
-        });
-    }
-
-    function resetForm() {
-        noteTitleInput.value = "";
-        noteCategoriesInput.value = "";
-        noteContentInput.innerHTML = "";
-        addNoteWrapper.classList.remove("active");
-
-        // FIX: Resetta la modalità in modo che l'evento corretto venga applicato dopo
+        // FIX: Imposta la modalità su "add"
         submitNoteBtn.dataset.mode = "add";
         submitNoteBtn.removeEventListener("click", updateNote);
         submitNoteBtn.removeEventListener("click", addNote);
         submitNoteBtn.addEventListener("click", addNote);
-    }
+    });
 
-    document.querySelector("#LogOut").addEventListener("click", logOut);
-});
+    closeNoteBtn.addEventListener("click", resetForm);
 
+    document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("edit-note-btn")) {
+            const noteId = event.target.getAttribute("data-id");
+            const index = notesArr.findIndex(note => note._id === noteId);
+            if (index !== -1) editNote(index);
+        }
+    });
+
+    document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("delete-note-btn")) {
+            const noteId = event.target.getAttribute("data-id");
+            if (noteId) deleteNote(noteId);
+        }
+    });
+}
+
+function resetForm() {
+    noteTitleInput.value = "";
+    noteCategoriesInput.value = "";
+    noteContentInput.innerHTML = "";
+    addNoteWrapper.classList.remove("active");
+
+    // FIX: Resetta la modalità in modo che l'evento corretto venga applicato dopo
+    submitNoteBtn.dataset.mode = "add";
+    submitNoteBtn.removeEventListener("click", updateNote);
+    submitNoteBtn.removeEventListener("click", addNote);
+    submitNoteBtn.addEventListener("click", addNote);
+}
 
 function filterEntries() {
     var searchTerm = document.getElementById("search").value.toLowerCase();

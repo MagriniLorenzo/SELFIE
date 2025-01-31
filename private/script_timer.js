@@ -1,14 +1,29 @@
-let pomodoro = document.getElementById("pomodoro-timer");
-let short = document.getElementById("short-timer");
-let long = document.getElementById("long-timer");
-let timers = document.querySelectorAll(".timer-display");
-let session = document.getElementById("pomodoro-session");
-let shortBreak = document.getElementById("short-break");
-let longBreak = document.getElementById("long-break");
-let startBtn = document.getElementById("start");
-let stopBtn = document.getElementById("stop");
-let currentTimer = null;
-let myInterval = null;
+let pomodoro, short, long,
+    timers, session, shortBreak, longBreak,
+    startBtn,stopBtn, currentTimer = null, myInterval = null;
+
+document.addEventListener("DOMContentLoaded",()=>{
+    pomodoro = document.getElementById("pomodoro-timer");
+    short = document.getElementById("short-timer");
+    long = document.getElementById("long-timer");
+    timers = document.querySelectorAll(".timer-display");
+    session = document.getElementById("pomodoro-session");
+    shortBreak = document.getElementById("short-break");
+    longBreak = document.getElementById("long-break");
+    startBtn = document.getElementById("start");
+    stopBtn = document.getElementById("stop");
+
+    document.querySelector("#LogOut").addEventListener("click", logOut);
+    startBtn.addEventListener("click", start);
+    stopBtn.addEventListener("click", stop);
+    shortBreak.addEventListener("click", pausaCorta);
+    longBreak.addEventListener("click", pausaLunga);
+    session.addEventListener("click", sessionePomodoro);
+
+    showDefaultTimer();
+
+
+});
 
 // Show the default timer
 function showDefaultTimer() {
@@ -19,10 +34,7 @@ function showDefaultTimer() {
     currentTimer = pomodoro;
 }
 
-showDefaultTimer();
-
-
-session.addEventListener("click", () => {
+function sessionePomodoro(){
 
     pomodoro.style.display = "block";
     short.style.display = "none";
@@ -35,10 +47,9 @@ session.addEventListener("click", () => {
     console.log(pomodoro);
 
     currentTimer = pomodoro;
-});
+}
 
-shortBreak.addEventListener("click", () => {
-
+function pausaCorta(){
     short.style.display = "block";
     pomodoro.style.display = "none";
     long.style.display = "none";
@@ -48,9 +59,9 @@ shortBreak.addEventListener("click", () => {
     longBreak.classList.remove("active");
 
     currentTimer = short;
-});
+}
 
-longBreak.addEventListener("click", () => {
+function pausaLunga(){
 
     long.style.display = "block";
     pomodoro.style.display = "none";
@@ -61,10 +72,7 @@ longBreak.addEventListener("click", () => {
     longBreak.classList.add("active");
 
     currentTimer = long;
-});
-
-
-
+}
 
 function startTimer(timerDisplay) {
     if (myInterval) {
@@ -80,47 +88,47 @@ function startTimer(timerDisplay) {
 
         seconds--;
 
-        
+
         if (seconds < 0) {
             seconds = 59;
             minutes--;
         }
 
-        
-        timerDisplay.querySelector(".time").textContent = 
+
+        timerDisplay.querySelector(".time").textContent =
             (minutes < 10 ? '0' + minutes : minutes) + ":" + (seconds < 10 ? '0' + seconds : seconds);
 
-        
+
         if (minutes <= 0 && seconds <= 0) {
             clearInterval(myInterval);
-            myInterval = null; 
+            myInterval = null;
         }
     }, 1000);
 }
 
-
-startBtn.addEventListener("click", () => {
+function start()  {
     if (currentTimer) {
         startTimer(currentTimer);
     } else {
         alert("Errore");
     }
-});
+}
 
-stopBtn.addEventListener("click", () => {
+
+function stop(){
     if (myInterval) {
-        clearInterval(myInterval);  
+        clearInterval(myInterval);
         myInterval = null;
 
         if (currentTimer) {
-            
+
             let originalTime = currentTimer.querySelector("h1").innerHTML;
-            
-            
+
+
             currentTimer.querySelector(".time").textContent = originalTime;
         }
     }
-});
+}
 
 async function logOut(){
     await fetch("http://localhost:3000/logout")
@@ -130,9 +138,5 @@ async function logOut(){
             window.location.href = "/";
         })
         .catch(console.error);
-
 }
-
-document.querySelector("#LogOut").addEventListener("click", logOut);
-
 
