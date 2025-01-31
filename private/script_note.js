@@ -1,4 +1,6 @@
 let notesArr = [];
+
+
 document.addEventListener("DOMContentLoaded", () => {
     let notesContainer = document.querySelector(".notes-container");
     let notesList = document.querySelector(".notes-list");
@@ -191,18 +193,20 @@ document.addEventListener("DOMContentLoaded", () => {
         submitNoteBtn.removeEventListener("click", addNote);
         submitNoteBtn.addEventListener("click", addNote);
     }
+
+    document.querySelector("#LogOut").addEventListener("click", logOut);
 });
 
-    
+
 function filterEntries() {
     var searchTerm = document.getElementById("search").value.toLowerCase();
     var entries = document.querySelectorAll(".note");
 
-        
+
     entries.forEach(function(entry) {
-            
+
         var titolo = entry.querySelector(".note-title").textContent.toLowerCase();
-            
+
         if (titolo.includes(searchTerm)) {
             entry.style.display = "";
         } else {
@@ -210,3 +214,15 @@ function filterEntries() {
         }
     });
 }
+
+async function logOut(){
+    await fetch("http://localhost:3000/logout")
+        .then(res => res.json())
+        .then(dati => {
+            console.log(dati);
+            window.location.href = "/";
+        })
+        .catch(console.error);
+
+}
+

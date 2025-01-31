@@ -122,3 +122,17 @@ stopBtn.addEventListener("click", () => {
     }
 });
 
+async function logOut(){
+    await fetch("http://localhost:3000/logout")
+        .then(res => res.json())
+        .then(dati => {
+            console.log(dati);
+            window.location.href = "/";
+        })
+        .catch(console.error);
+
+}
+
+document.querySelector("#LogOut").addEventListener("click", logOut);
+
+

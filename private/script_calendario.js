@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
   addEventFrom = document.querySelector(".event-time-from");
   addEventTo = document.querySelector(".event-time-to");
   addEventSubmit = document.querySelector(".add-event-btn");
+  document.querySelector("#LogOut").addEventListener("click", logOut);
+
 
   addEvent();
 
@@ -192,12 +194,11 @@ function addListner() {
 }
 
 function gotoDate() {
-  console.log("here");
   const dateArr = dateInput.value.split("/");
-  if (dateArr.length === 2) {
-    if (dateArr[0] > 0 && dateArr[0] < 13 && dateArr[1].length === 4) {
-      month = dateArr[0] - 1;
-      year = dateArr[1];
+  if (dateArr.length === 3) {
+    if (dateArr[1] > 0 && dateArr[1] < 13 && dateArr[2].length === 4) {
+      month = dateArr[1] - 1;
+      year = dateArr[2];
       initCalendar();
       return;
     }
@@ -303,18 +304,35 @@ function addEvent() {
     initCalendar();
   });
 
+  // dateInput.addEventListener("input", (e) => {
+  //   dateInput.value = dateInput.value.replace(/[^0-9/]/g, "");
+  //   if (dateInput.value.length === 2) {
+  //
+  //     dateInput.value = dateInput.value.charAt(1)=== "/"?"0"+dateInput.value.charAt(0)+"/":dateInput.value+"/";
+  //   }
+  //   if (dateInput.value.length === 5) {
+  //     dateInput.value += "/";
+  //   }
+  //   if (dateInput.value.length > 10) {
+  //     dateInput.value = dateInput.value.slice(0, 10);
+  //   }
+  //   if (e.inputType === "deleteContentBackward") {
+  //     if (dateInput.value.length === 3) {
+  //       dateInput.value = dateInput.value.slice(0, 2);
+  //     }
+  //     if (dateInput.value.length === 6) {
+  //       dateInput.value = dateInput.value.slice(0, 5);
+  //     }
+  //   }
+  // });
+
   dateInput.addEventListener("input", (e) => {
-    dateInput.value = dateInput.value.replace(/[^0-9/]/g, "");
-    if (dateInput.value.length === 2) {
-      dateInput.value += "/";
-    }
-    if (dateInput.value.length > 7) {
-      dateInput.value = dateInput.value.slice(0, 7);
-    }
-    if (e.inputType === "deleteContentBackward") {
-      if (dateInput.value.length === 3) {
-        dateInput.value = dateInput.value.slice(0, 2);
-      }
+    if (dateInput.value.length > 10) {
+      let d = dateInput.value;
+      let first = d.slice(0,4);
+      d=d.split("-");
+      d[0]=first;
+      dateInput.value = d.join("-");
     }
   });
 
@@ -490,6 +508,17 @@ function addEvent() {
       }
     }
   });
+}
+
+async function logOut(){
+  await fetch("http://localhost:3000/logout")
+      .then(res => res.json())
+      .then(dati => {
+        console.log(dati);
+        window.location.href = "/";
+      })
+      .catch(console.error);
+
 }
 //function to save events in local storage
 /*

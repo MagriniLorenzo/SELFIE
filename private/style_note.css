@@ -9,6 +9,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
     height: 100vh;
 }
 
@@ -69,7 +70,7 @@ button {
 }
 
 .add-note-form {
-    width: 80%;
+    width: 50%;
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
@@ -171,6 +172,36 @@ button.delete-note-btn {
     margin-top: 5px;
 }
 
+nav{
+    display: grid;
+    grid-template-areas: ". h b";
+    grid-template-columns: 1fr 3fr 1fr;
+    justify-content: stretch;
+    align-items: center;
+    width:100%;
+    height: 10%;
+
+}
+
+#LogOut{
+    grid-area: b;
+    background-color: #e05151;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    font-size: medium;
+    margin: 10px;
+    padding: 10px;
+    max-height: 50px;
+    justify-self: center;
+}
+
+h1{
+    grid-area: h;
+    text-align: center;
+    justify-self: stretch;
+}
 
 @media screen and (max-width: 600px) {
     .notes-container {

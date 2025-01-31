@@ -112,16 +112,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 e.target.classList.add("selected");
 
-                const clickedDate = new Date(e.target.getAttribute('data-date'));
+                let formattedDate = e.target.getAttribute('data-date').split("/").reverse().join("-")
+                const clickedDate = new Date(formattedDate);
                 if (normalizeDate(clickedDate).getTime() === normalizeDate(new Date()).getTime()) {
                     eventsTodayTitle.textContent = "Eventi di Oggi";
                 } else {
-                    eventsTodayTitle.textContent = `Eventi di ${clickedDate.toLocaleDateString('it-IT', { weekday: 'long' }).charAt(0).toUpperCase() + clickedDate.toLocaleDateString('it-IT', { weekday: 'long' }).slice(1)}`;
+                    const giorniSettimana = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+                    const dayOfWeek = giorniSettimana[clickedDate.getDay()];
+
+                    // let dayLong = clickedDate.toLocaleDateString('it-IT', { weekday: 'long' });
+                    eventsTodayTitle.textContent = `Eventi di ${dayOfWeek}`;
                 }
                 recuperaEventi(clickedDate);
             }
         });
         preSelectToday();
+    }
+
+    async function logOut(){
+        await fetch("http://localhost:3000/logout")
+            .then(res => res.json())
+            .then(dati => {
+                console.log(dati);
+                window.location.href = "/";
+            })
+            .catch(console.error);
+
     }
 
     // Aggiungi evento per tutto il widget calendar-widget tranne che sui giorni
@@ -139,8 +155,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.querySelector(".timer-widget").addEventListener("click", (e) => {
-        window.location.href = "/home/timer"; 
-
+        window.location.href = "/home/timer";
     });
 
+    document.querySelector("#LogOut").addEventListener("click", logOut);
 });

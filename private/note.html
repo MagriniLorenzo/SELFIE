@@ -14,12 +14,14 @@
 
 </head>
 <body>
-<h1>Le tue Note</h1>
-
+<nav>
+  <h1>Le tue Note</h1>
+  <button id="LogOut">Log out</button>
+</nav>
 <div class="notes-container">
-  
+
   <div class="eInput">
-    <input type="text" onkeyup="filterEntries()" placeholder="Cerca fra le tie note" id="search">
+    <input type="text" onkeyup="filterEntries()" placeholder="Cerca fra le tue note" id="search">
   </div>
   
   <div class="notes-list">
@@ -31,17 +33,17 @@
   <div class="add-note-wrapper">
       <div class="add-note-form">
         <h2>Aggiungi una Nota</h2>
-        <label for="note-title">Titolo:</label>
+        <label>Titolo:</label>
         <input type="text" class="note-title" placeholder="Titolo della nota">
-        <label for="note-categories">Categorie (separate da virgola):</label>
+        <label>Categorie (separate da virgola):</label>
         <input type="text" class="note-categories" placeholder="Es: Lavoro, Personale">
-        <label for="note-content">Contenuto:</label>
+        <label>Contenuto:</label>
         <div id="editor" class="note-content"></div> <!-- Quill -->
         <button class="submit-note-btn">Salva Nota</button>
         <button class="close-note-btn">Chiudi</button>
     </div>
 </div>
-
+</div>
 <script>
   //Quill
   var quill = new Quill('#editor', {
@@ -62,5 +64,6 @@
     }
   });
 </script>
+
 </body>
 </html>
