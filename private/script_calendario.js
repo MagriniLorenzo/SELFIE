@@ -7,6 +7,7 @@ let today = new Date();
 let activeDay;
 let month = today.getMonth();
 let year = today.getFullYear();
+// let tempToday;
 
 const months = [
   "Gennaio",
@@ -46,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   addEventTo = document.querySelector(".event-time-to");
   addEventSubmit = document.querySelector(".add-event-btn");
   document.querySelector("#LogOut").addEventListener("click", logOut);
+  document.querySelector(".SetToday-btn").addEventListener("click", setToday)
 
 
   addEvent();
@@ -60,18 +62,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function fetchEvents() {
   return fetch("http://localhost:3000/events")
-    .then((response) => response.text())
-    .then((data) => {
-      eventsArr = JSON.parse(data); // Popola l'array eventsArr con i dati
-      console.log(eventsArr); // Mostra gli eventi ricevuti
-    })
-    .catch((error) => {
-      console.error("Errore nel recupero degli eventi:", error); // Gestisce gli errori
-    });
+      .then((response) => response.text())
+      .then((data) => {
+        eventsArr = JSON.parse(data); // Popola l'array eventsArr con i dati
+        console.log(eventsArr); // Mostra gli eventi ricevuti
+      })
+      .catch((error) => {
+        console.error("Errore nel recupero degli eventi:", error); // Gestisce gli errori
+      });
+}
+
+function changeStatus() {
+  //to-do
 }
 
 //function to add days in days with class day and prev-date next-date on previous month and next month days and active on today
 function initCalendar() {
+  //setto randomicamente lo stato degli eventi passati
+  changeStatus();
+
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const prevLastDay = new Date(year, month, 0);
@@ -99,7 +108,8 @@ function initCalendar() {
         event = true;
       }
     });
-    if (i === new Date().getDate() && year === new Date().getFullYear() && month === new Date().getMonth()) {
+    // if (i === new Date().getDate() && year === new Date().getFullYear() && month === new Date().getMonth()) {
+    if (i === today.getDate() && year === today.getFullYear() && month === today.getMonth()) {
       activeDay = i;
       getActiveDay(i);
       updateEvents(i);
@@ -165,8 +175,8 @@ function addListner() {
           const days = document.querySelectorAll(".day");
           days.forEach((day) => {
             if (
-              !day.classList.contains("prev-date") &&
-              day.innerHTML === e.target.innerHTML
+                !day.classList.contains("prev-date") &&
+                day.innerHTML === e.target.innerHTML
             ) {
               day.classList.add("active");
             }
@@ -179,8 +189,8 @@ function addListner() {
           const days = document.querySelectorAll(".day");
           days.forEach((day) => {
             if (
-              !day.classList.contains("next-date") &&
-              day.innerHTML === e.target.innerHTML
+                !day.classList.contains("next-date") &&
+                day.innerHTML === e.target.innerHTML
             ) {
               day.classList.add("active");
             }
@@ -194,11 +204,11 @@ function addListner() {
 }
 
 function gotoDate() {
-  const dateArr = dateInput.value.split("/");
+  const dateArr = dateInput.value.split("-");
   if (dateArr.length === 3) {
-    if (dateArr[1] > 0 && dateArr[1] < 13 && dateArr[2].length === 4) {
-      month = dateArr[1] - 1;
-      year = dateArr[2];
+    if (dateArr[1] > 0 && dateArr[1] < 13 && dateArr[0].length === 4) {
+      month = parseInt(dateArr[1]) - 1;
+      year = parseInt(dateArr[0]);
       initCalendar();
       return;
     }
@@ -209,7 +219,7 @@ function gotoDate() {
 //function get active day name and date and update eventday eventdate
 function getActiveDay(date) {
   const day = new Date(year, month, date);
-  
+
   // Ottieni il nome del giorno della settimana in italiano
   const dayName = day.toLocaleDateString('it-IT', { weekday: 'long' });
 
@@ -223,14 +233,14 @@ function getActiveDay(date) {
 //function update events when a day is active
 function updateEvents(date) {
   let events = "";
-  
+
   // Itera su tutti gli eventi in eventsArr
   eventsArr.forEach((event) => {
     // Verifica se il giorno, mese e anno corrispondono
     if (
-      date === event.day && // Giorno
-      month + 1 === event.month && // Mese (assicurati che month sia 0-based, quindi aggiungi 1)
-      year === event.year // Anno
+        date === event.day && // Giorno
+        month + 1 === event.month && // Mese (assicurati che month sia 0-based, quindi aggiungi 1)
+        year === event.year // Anno
     ) {
       // Aggiungi l'evento alla variabile events come HTML
       events += `
@@ -290,7 +300,7 @@ function convertTime(time) {
 
 
 /**
-    Aggiunta eventi agli elementi del dom
+ Aggiunta eventi agli elementi del dom
  */
 function addEvent() {
   prev.addEventListener("click", prevMonth);
@@ -518,8 +528,18 @@ async function logOut(){
         window.location.href = "/";
       })
       .catch(console.error);
-
 }
+
+function setToday() {
+  if(dateInput.value){
+    today = new Date(dateInput.value);
+    month = today.getMonth();
+    year = today.getFullYear();
+
+    initCalendar();
+  }
+}
+
 //function to save events in local storage
 /*
 function saveEvents() {

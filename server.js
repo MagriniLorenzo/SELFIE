@@ -28,8 +28,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
     secret: 'your_secret_key',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,   // Evita accessi JavaScript (protezione da XSS)
+        secure: false,    // Metti "true" se usi HTTPS
+        sameSite: "strict" // Previene attacchi CSRF
+    }
 }));
+
+app.use((req, res, next) => {
+    if (req.session) {
+        req.session.cookie.maxAge = 30 * 60 * 1000; // 30 minuti di inattività
+    }
+    next();
+});
 
 // Inizializza Passport.js
 app.use(passport.initialize());
@@ -83,7 +95,8 @@ app.get("/home", isAuthenticated, (req, res) => {
 
 // Endpoint per ottenere eventi
 app.get("/events", isAuthenticated, (req, res) => {
-    getEventsFromDB()
+
+    getEventsFromDB(req.user.username)
         .then((events) => {
             // Se il file non esiste o è vuoto, restituisci un array vuoto
             events = events ? events : [];
@@ -101,6 +114,8 @@ app.post("/events", isAuthenticated, (req, res) => {
     // if (!Array.isArray(newEvents)) {
     //     return res.status(400).send("Il formato dei dati deve essere un array di eventi.");
     // }
+    //aggingo l'id dell'utente
+    newEvent.id_user=req.user.username;
 
     addEventOnDB(newEvent)
         .then((events) => {
@@ -119,7 +134,7 @@ app.delete("/events", isAuthenticated, async (req, res) => {
         return res.status(400).send("I parametri 'title', 'day', 'month', 'year' e '_id' sono obbligatori.");
     }
 
-    await deleteEventOnDB(_id)
+    await deleteEventOnDB(_id,req.user.username)
         .then((events) => {
             if(events===1){
                 return res.status(200).json({ message: "Evento eliminato con successo" });
@@ -134,7 +149,7 @@ app.delete("/events", isAuthenticated, async (req, res) => {
 
 // Endpoint per ottenere note
 app.get("/notes", isAuthenticated, async (req, res) => {
-    await getNotesFromDB()
+    await getNotesFromDB(req.user.username)
         .then((notes) => {
             // Se il file non esiste o è vuoto, restituisci un array vuoto
             notes = notes ? notes : [];
@@ -148,6 +163,8 @@ app.get("/notes", isAuthenticated, async (req, res) => {
 // Endpoint per salvare note con ID incrementale
 app.post("/notes", isAuthenticated, async (req, res) => {
     const newNote = req.body;
+
+    newNote.id_user=req.user.username;
 
     if (!newNote.title || !newNote.content || !newNote.categories) {
         return res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
@@ -190,8 +207,9 @@ app.post("/notes", isAuthenticated, async (req, res) => {
 
 // Endpoint per aggiornare una nota
 app.put("/notes/:id", isAuthenticated, async (req, res) => {
-    const { id } = req.params;
+    const {id} = req.params;
     const updatedNote = req.body;
+    updatedNote.id_user=req.user.username;
 
     if (!updatedNote.title || !updatedNote.content || !updatedNote.categories) {
         return res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
@@ -252,7 +270,7 @@ app.put("/notes/:id", isAuthenticated, async (req, res) => {
 app.delete("/notes/:id", isAuthenticated, async (req, res) => {
     const { id } = req.params; // Ottieni l'ID dalla richiesta
 
-    await deleteNoteOnDB(id)
+    await deleteNoteOnDB(id,req.user.username)
         .then((events) => {
             if(events===1){
                 return res.status(200).json({ message: "Nota eliminata con successo" });

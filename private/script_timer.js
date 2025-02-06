@@ -21,8 +21,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     session.addEventListener("click", sessionePomodoro);
 
     showDefaultTimer();
-
-
 });
 
 // Show the default timer

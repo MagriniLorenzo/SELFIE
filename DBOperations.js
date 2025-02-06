@@ -7,14 +7,14 @@ const tableNames = ["EVENT", "NOTE", "USER"];
  * Ottiene tutti gli eventi dal db
  * @returns {Promise<WithId<Document>[]>}
  */
-const getEventsFromDB = async () => {
-        const client = new MongoClient(uri);
+const getEventsFromDB = async (username) => {
+    const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
         await client.connect();
         const collection = database.collection(tableNames[0]);
 
-        const events = await collection.find().toArray(); // Recupera tutti gli eventi
+        const events = await collection.find({id_user:username}).toArray(); // Recupera tutti gli eventi
         console.log(events);
 
         return events; // Restituisce i dati per ulteriori elaborazioni
@@ -50,16 +50,17 @@ const addEventOnDB = async (event) => {
 /**
  * Funzione per eliminare un evento dal db
  * @param eventId id dell'evento da eliminare
+ * @param username
  * @returns {Promise<number>}
  */
-const deleteEventOnDB = async (eventId) => {
+const deleteEventOnDB = async (eventId, username) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
         await client.connect();
         const collection = database.collection(tableNames[0]);
         // Usa l'ID per identificare l'evento
-        const result = await collection.deleteOne({ _id: new ObjectId(eventId) });
+        const result = await collection.deleteOne({ _id: new ObjectId(eventId), id_user: username});
 
         return result.deletedCount; // Restituisce il numero di documenti eliminati (in questo caso, 1 o 0)
     } catch (error) {
@@ -74,14 +75,14 @@ const deleteEventOnDB = async (eventId) => {
  * Ottiene tutte le note dal db
  * @returns {Promise<WithId<Document>[]>}
  */
-const getNotesFromDB = async () => {
+const getNotesFromDB = async (username) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
         await client.connect();
         const collection = database.collection(tableNames[1]);
 
-        const notes = await collection.find().toArray(); // Recupera tutte le note
+        const notes = await collection.find({id_user:username}).toArray(); // Recupera tutte le note
         console.log(notes);
 
         return notes; // Restituisce i dati per ulteriori elaborazioni
@@ -109,14 +110,14 @@ const addNoteOnDB = async (note) => {
     }
 };
 
-const deleteNoteOnDB = async (noteId) => {
+const deleteNoteOnDB = async (noteId,username) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
         await client.connect();
         const collection = database.collection(tableNames[1]);
         // Usa l'ID per identificare l'evento
-        const result = await collection.deleteOne({ _id: new ObjectId(noteId) });
+        const result = await collection.deleteOne({ _id: new ObjectId(noteId), id_user:username });
 
         return result.deletedCount; // Restituisce il numero di documenti eliminati (in questo caso, 1 o 0)
     } catch (error) {
@@ -136,7 +137,7 @@ const updateNoteOnDB = async (id, note) => {
 
         // Aggiornare la nota con il nuovo contenuto
         const result = await collection.updateOne(
-            { _id: new ObjectId(id) }, // Trova la nota tramite l'ID
+            { _id: new ObjectId(id), id_user:note.id_user }, // Trova la nota tramite l'ID
             { $set: note } // Applica gli aggiornamenti
         );
 
