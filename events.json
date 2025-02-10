@@ -1,50 +1,168 @@
 [{
   "_id": {
-    "$oid": "6797a4aeac3d1a1e70b3f378"
+    "$oid": "67a627eacccd27031ed53860"
   },
-  "title": "Prova",
-  "time": "7:00 PM - 9:00 PM",
-  "day": 18,
-  "month": 12,
-  "year": 2024
+  "title": "Happy Hour",
+  "location": "The Bar, New York, NY",
+  "description": "Let's blow off some steam with a tall cold one!",
+  "start": "2025-02-08T19:00:00",
+  "end": "2025-02-08T23:30:00",
+  "attendees": [
+    {
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "icsOptions": {
+        "rsvp": true
+      }
+    },
+    {
+      "name": "Jane Doe",
+      "email": "jane@doe.com"
+    }
+  ],
+  "recurrence": {
+    "frequency": "WEEKLY",
+    "interval": 2
+  },
+  "id_user": "admin"
 },
 {
   "_id": {
-    "$oid": "6797a4aeac3d1a1e70b3f379"
+    "$oid": "67a627eacccd27031ed53861"
   },
-  "title": "Prova",
-  "time": "12:00 PM - 1:00 PM",
-  "day": 20,
-  "month": 12,
-  "year": 2024
+  "title": "Happy Hour",
+  "location": "The Bar, New York, NY",
+  "description": "Let's blow off some steam with a tall cold one!",
+  "start": "2025-02-08T15:00:00",
+  "end": "2025-02-08T19:30:00",
+  "attendees": [
+    {
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "icsOptions": {
+        "rsvp": true
+      }
+    },
+    {
+      "name": "Jane Doe",
+      "email": "jane@doe.com"
+    }
+  ],
+  "recurrence": {
+    "frequency": "WEEKLY",
+    "interval": 2
+  },
+  "id_user": "admin"
 },
 {
   "_id": {
-    "$oid": "679b5892252d73a765cdfbaa"
+    "$oid": "67a627eacccd27031ed53862"
   },
-  "title": "evento bello",
-  "time": "11:11 AM - 10:22 PM",
-  "day": 30,
-  "month": 1,
-  "year": 2025
+  "title": "Happy Hour",
+  "location": "The Bar, New York, NY",
+  "description": "Let's blow off some steam with a tall cold one!",
+  "start": "2025-02-07T09:00:00",
+  "end": "2025-02-09T12:30:00",
+  "attendees": [
+    {
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "icsOptions": {
+        "rsvp": true
+      }
+    },
+    {
+      "name": "Jane Doe",
+      "email": "jane@doe.com"
+    }
+  ],
+  "recurrence": {
+    "frequency": "WEEKLY",
+    "interval": 2
+  },
+  "id_user": "admin"
 },
 {
   "_id": {
-    "$oid": "679b68dc51fa8e3532ee4633"
+    "$oid": "67a627eacccd27031ed53863"
   },
-  "title": "calcio",
-  "time": "11:11 AM - 10:22 PM",
-  "day": 31,
-  "month": 1,
-  "year": 2025
+  "title": "Happy Hour",
+  "location": "The Bar, New York, NY",
+  "description": "Let's blow off some steam with a tall cold one!",
+  "start": "",
+  "end": "2025-02-20T12:30:00",
+  "attendees": [
+    {
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "icsOptions": {
+        "rsvp": true
+      }
+    },
+    {
+      "name": "Jane Doe",
+      "email": "jane@doe.com"
+    }
+  ],
+  "recurrence": {
+    "frequency": "WEEKLY",
+    "interval": 2
+  },
+  "id_user": "admin"
 },
 {
   "_id": {
-    "$oid": "679b69b5027bc81a9bb3a36b"
+    "$oid": "67a64a50cccd27031ed53864"
   },
-  "title": "bho",
-  "time": "11:11 AM - 11:12 AM",
-  "day": 17,
-  "month": 1,
-  "year": 2025
+  "title": "Not Happy Hour",
+  "location": "The Bar, New York, NY",
+  "description": "Let's blow off some steam with a tall cold one!",
+  "start": "",
+  "end": "2025-02-05T12:30:00",
+  "attendees": [
+    {
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "icsOptions": {
+        "rsvp": true
+      }
+    },
+    {
+      "name": "Jane Doe",
+      "email": "jane@doe.com"
+    }
+  ],
+  "recurrence": {
+    "frequency": "WEEKLY",
+    "interval": 2
+  },
+  "id_user": "admin"
+},
+{
+  "_id": {
+    "$oid": "67a8cf61ed87892fab4edffd"
+  },
+  "title": "Happy Hour",
+  "location": "The Bar, New York, NY",
+  "description": "Let's blow off some steam with a tall cold one!",
+  "start": "2025-02-05T19:00:00",
+  "end": "2025-02-05T23:30:00",
+  "attendees": [
+    {
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "icsOptions": {
+        "rsvp": true
+      }
+    },
+    {
+      "name": "Jane Doe",
+      "email": "jane@doe.com"
+    }
+  ],
+  "recurrence": {
+    "frequency": "WEEKLY",
+    "interval": 2
+  },
+  "id_user": "admin"
 }]

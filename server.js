@@ -1,19 +1,36 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const fs = require("fs");
-const cors = require("cors");
-const path = require("path");
+// const express = require("express");
+// const bodyParser = require("body-parser");
+// const fs = require("fs");
+// const cors = require("cors");
+// const path = require("path");
 const PORT = 3000;
 const EVENT_FILE_PATH = "./events.json";
 const NOTES_FILE_PATH = "./notes.json";
-const session = require('express-session');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcryptjs');
-const { getEventsFromDB, addEventOnDB, deleteEventOnDB,
-        addAccountOnDB, getAccountFromDB, getNotesFromDB,
-        updateNoteOnDB, deleteNoteOnDB, addNoteOnDB } = require("./DBOperations");
+// const session = require('express-session');
+// const passport = require('passport');
+// const LocalStrategy = require('passport-local').Strategy;
+// const bcrypt = require('bcryptjs');
+// const ICalendar = require("datebook");
+// const { getEventsFromDB, addEventOnDB, deleteEventOnDB,
+//         addAccountOnDB, getAccountFromDB, getNotesFromDB,
+//         updateNoteOnDB, deleteNoteOnDB, addNoteOnDB } = require("./DBOperations");
+import {GoogleCalendar, ICalendar} from 'datebook';
+import express from 'express';
+import session from 'express-session';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import cors from 'cors';
+import passport from 'passport';
+import LocalStrategy from 'passport-local';
+import bcrypt from 'bcryptjs';
+import path from 'path';
+import { fileURLToPath } from "url";
+import { getEventsFromDB, addEventOnDB, deleteEventOnDB,
+         addNoteOnDB, updateNoteOnDB, getNotesFromDB,
+         getAccountFromDB, addAccountOnDB, deleteNoteOnDB} from "./DBOperations.js"
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 
 // Middleware
@@ -28,8 +45,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
     secret: 'your_secret_key',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,   // Evita accessi JavaScript (protezione da XSS)
+        secure: false,    // Metti "true" se usi HTTPS
+        sameSite: "strict" // Previene attacchi CSRF
+    }
 }));
+
+app.use((req, res, next) => {
+    if (req.session) {
+        req.session.cookie.maxAge = 30 * 60 * 1000; // 30 minuti di inattività
+    }
+    next();
+});
 
 // Inizializza Passport.js
 app.use(passport.initialize());
@@ -83,7 +112,7 @@ app.get("/home", isAuthenticated, (req, res) => {
 
 // Endpoint per ottenere eventi
 app.get("/events", isAuthenticated, (req, res) => {
-    getEventsFromDB()
+    getEventsFromDB(req.user.username)
         .then((events) => {
             // Se il file non esiste o è vuoto, restituisci un array vuoto
             events = events ? events : [];
@@ -101,6 +130,8 @@ app.post("/events", isAuthenticated, (req, res) => {
     // if (!Array.isArray(newEvents)) {
     //     return res.status(400).send("Il formato dei dati deve essere un array di eventi.");
     // }
+    //aggingo l'id dell'utente
+    newEvent.id_user=req.user.username;
 
     addEventOnDB(newEvent)
         .then((events) => {
@@ -113,13 +144,13 @@ app.post("/events", isAuthenticated, (req, res) => {
 
 // Endpoint per eliminare un evento
 app.delete("/events", isAuthenticated, async (req, res) => {
-    const { title, day, month, year, _id } = req.body; // Parametri dell'evento da eliminare
+    const { title, description, start, end, attendees, recurrence,_id } = req.body; // Parametri dell'evento da eliminare
 
-    if (!title || !day || !month || !year || !_id) {
-        return res.status(400).send("I parametri 'title', 'day', 'month', 'year' e '_id' sono obbligatori.");
-    }
+    // if (!title || !description || !start || !end || !attendees || !recurrence || !_id) {
+    //     return res.status(400).send("I parametri 'title', 'description', 'start', 'end', 'attendees', 'recurrence', '_id' sono obbligatori.");
+    // }
 
-    await deleteEventOnDB(_id)
+    await deleteEventOnDB(_id,req.user.username)
         .then((events) => {
             if(events===1){
                 return res.status(200).json({ message: "Evento eliminato con successo" });
@@ -134,7 +165,7 @@ app.delete("/events", isAuthenticated, async (req, res) => {
 
 // Endpoint per ottenere note
 app.get("/notes", isAuthenticated, async (req, res) => {
-    await getNotesFromDB()
+    await getNotesFromDB(req.user.username)
         .then((notes) => {
             // Se il file non esiste o è vuoto, restituisci un array vuoto
             notes = notes ? notes : [];
@@ -149,34 +180,12 @@ app.get("/notes", isAuthenticated, async (req, res) => {
 app.post("/notes", isAuthenticated, async (req, res) => {
     const newNote = req.body;
 
+    newNote.id_user=req.user.username;
+
     if (!newNote.title || !newNote.content || !newNote.categories) {
         return res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
     }
 
-    /*
-    fs.readFile(NOTES_FILE_PATH, "utf8", (err, data) => {
-        if (err && err.code !== "ENOENT") {
-            return res.status(500).send("Errore nella lettura del file delle note");
-        }
-
-        const existingNotes = data ? JSON.parse(data) : [];
-        const newId = existingNotes.length > 0 ? Math.max(...existingNotes.map(note => note.id)) + 1 : 1;
-
-        const noteWithId = {
-            ...newNote,
-            id: newId,
-            createdAt: new Date().toLocaleDateString("it-IT"),
-            updatedAt: new Date().toLocaleDateString("it-IT")
-        };
-
-        existingNotes.push(noteWithId);
-
-        fs.writeFile(NOTES_FILE_PATH, JSON.stringify(existingNotes, null, 2), (err) => {
-            if (err) {
-                return res.status(500).send("Errore nella scrittura del file delle note");
-            }
-            res.json(noteWithId);
-*/
     await addNoteOnDB(newNote)
         .then((note) => {
             return res.status(200).send(note);
@@ -184,40 +193,18 @@ app.post("/notes", isAuthenticated, async (req, res) => {
         .catch((error) => {
             return res.status(500).send(`Errore nella scrittura della nota ${error}`);
         });
-
-
 });
 
 // Endpoint per aggiornare una nota
 app.put("/notes/:id", isAuthenticated, async (req, res) => {
-    const { id } = req.params;
+    const {id} = req.params;
     const updatedNote = req.body;
+    updatedNote.id_user=req.user.username;
 
     if (!updatedNote.title || !updatedNote.content || !updatedNote.categories) {
         return res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
     }
 
-/*    try {
-        const data = await fs.promises.readFile(NOTES_FILE_PATH, "utf8");
-        const existingNotes = data ? JSON.parse(data) : [];
-        const noteIndex = existingNotes.findIndex(note => note.id === parseInt(id));
-
-        if (noteIndex === -1) {
-            return res.status(404).send("Nota non trovata.");
-        }
-
-        existingNotes[noteIndex] = {
-            ...existingNotes[noteIndex],
-            ...updatedNote,
-            updatedAt: new Date().toLocaleDateString("it-IT") // Aggiorna la data di ultima modifica
-        };
-
-        await fs.promises.writeFile(NOTES_FILE_PATH, JSON.stringify(existingNotes, null, 2));
-        res.json(existingNotes);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Errore nella scrittura del file delle note");
-    }*/
     await updateNoteOnDB(id, updatedNote)
         .then((note) => {
             return res.status(200).send(note);
@@ -225,34 +212,13 @@ app.put("/notes/:id", isAuthenticated, async (req, res) => {
         .catch((error) => {
             return res.status(500).send(`Errore nella scrittura della nota ${error}`);
         });
-    // try {
-    //     const data = await fs.promises.readFile(NOTES_FILE_PATH, "utf8");
-    //     const existingNotes = data ? JSON.parse(data) : [];
-    //     const noteIndex = existingNotes.findIndex(note => note.id === parseInt(id));
-    //
-    //     if (noteIndex === -1) {
-    //         return res.status(404).send("Nota non trovata.");
-    //     }
-    //
-    //     // Aggiorna la nota con i nuovi dati
-    //     existingNotes[noteIndex] = { ...existingNotes[noteIndex], ...updatedNote };
-    //
-    //     // Scrive i dati aggiornati nel file
-    //     await fs.promises.writeFile(NOTES_FILE_PATH, JSON.stringify(existingNotes, null, 2));
-    //
-    //     // Restituisce l'array aggiornato delle note
-    //     res.json(existingNotes);
-    // } catch (err) {
-    //     console.error(err);
-    //     res.status(500).send("Errore nella scrittura del file delle note");
-    // }
 });
 
 // Endpoint per eliminare una nota
 app.delete("/notes/:id", isAuthenticated, async (req, res) => {
     const { id } = req.params; // Ottieni l'ID dalla richiesta
 
-    await deleteNoteOnDB(id)
+    await deleteNoteOnDB(id,req.user.username)
         .then((events) => {
             if(events===1){
                 return res.status(200).json({ message: "Nota eliminata con successo" });
@@ -283,28 +249,6 @@ app.get("/home/timer", isAuthenticated, (req, res) => {
     res.sendFile(filePath)
 });
 
-// Endpoint per login
-// app.post("/login", (req, res) => {
-//     const userData = req.body;
-//
-//     if (!isNonEmptyJSON(userData)) {
-//         return res.status(400).send("Il formato dei dati deve essere un Json non vuoto.");
-//     }
-//
-//     getAccountFromDB(userData.username, userData.password)
-//         .then((events) => {
-//             if(events)
-//                 return res.status(200).send("Login andato a buon fine");
-//                 // return res.redirect(301, './home');
-//             else {
-//                 return res.status(400).send("Errore, il nome utente che hai inserito non esiste o non ha la password indicata");
-//             }
-//         })
-//         .catch((error) => {
-//             return res.status(500).send(`Errore durante il login ${error}`);
-//         });
-// });
-
 // Endpoint per servire la pagina principale
 app.get("/", (req, res) => {
     const filePath = path.join(__dirname, "public", "index.html");
@@ -325,20 +269,6 @@ function isNonEmptyJSON(variable) {
         !Array.isArray(variable) &&
         Object.keys(variable).length > 0;
 }
-
-// // Rotta di registrazione (Signup)
-// app.post('/register', async (req, res) => {
-//     const { username, password } = req.body;
-//     if (users.find(user => user.username === username)) {
-//         return res.status(400).json({ message: 'Username già registrato' });
-//     }
-//
-//     // Hasheriamo la password
-//     const hashedPassword = await bcrypt.hash(password, 10);
-//     users.push({ username, password: hashedPassword });
-//
-//     res.json({ message: 'Registrazione completata' });
-// });
 
 // Endpoint per creare un account
 app.post("/register", async (req, res) => {

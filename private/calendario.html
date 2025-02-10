@@ -64,6 +64,14 @@
         <div class="add-event-wrapper">
           <div class="add-event-header">
             <div class="title">Add Event</div>
+            <div class="radio">
+              <input id="radio-1" name="radio" value="event" type="radio" checked>
+              <label for="radio-1" class="radio-label">Event</label>
+            </div>
+            <div class="radio">
+              <input id="radio-2" name="radio" value="activity" type="radio">
+              <label  for="radio-2" class="radio-label">Activity</label>
+            </div>
             <i class="fas fa-times close"></i>
           </div>
           <div class="add-event-body">
@@ -71,18 +79,13 @@
               <input type="text" placeholder="Event Name" class="event-name" />
             </div>
             <div class="add-event-input">
-              <input
-                type="text"
-                placeholder="Event Time From"
-                class="event-time-from"
-              />
+              <textarea placeholder="Event Description" class="event-description"></textarea>
+            </div>
+            <div id="eventStart" class="add-event-input">
+              <input type="datetime-local" placeholder="dd/mm/yyyy" class="event-time-from" />
             </div>
             <div class="add-event-input">
-              <input
-                type="text"
-                placeholder="Event Time To"
-                class="event-time-to"
-              />
+              <input type="datetime-local" placeholder="dd/mm/yyyy" class="event-time-to" />
             </div>
           </div>
           <div class="add-event-footer">

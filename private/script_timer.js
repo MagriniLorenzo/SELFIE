@@ -14,15 +14,13 @@ document.addEventListener("DOMContentLoaded",()=>{
     stopBtn = document.getElementById("stop");
 
     document.querySelector("#LogOut").addEventListener("click", logOut);
-    startBtn.addEventListener("click", start);
+    startBtn.addEventListener("click", dayStart);
     stopBtn.addEventListener("click", stop);
     shortBreak.addEventListener("click", pausaCorta);
     longBreak.addEventListener("click", pausaLunga);
     session.addEventListener("click", sessionePomodoro);
 
     showDefaultTimer();
-
-
 });
 
 // Show the default timer
@@ -106,7 +104,7 @@ function startTimer(timerDisplay) {
     }, 1000);
 }
 
-function start()  {
+function dayStart()  {
     if (currentTimer) {
         startTimer(currentTimer);
     } else {
