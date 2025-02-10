@@ -280,7 +280,7 @@ body {
   flex-direction: column;
   padding-left: 4px;
 }
-.events .event {
+.events .event , .events .activity{
   position: relative;
   width: 95%;
   min-height: 70px;
@@ -295,18 +295,18 @@ body {
   cursor: pointer;
 }
 /* even event */
-.events .event:nth-child(even) {
+.events .event:nth-child(even), .events .activity:nth-child(even) {
   background: transparent;
 }
 .events .event:hover {
   background: linear-gradient(90deg, var(--primary-clr), transparent);
 }
-.events .event .title {
+.events .event .title, .events .activity .title {
   display: flex;
   align-items: center;
   pointer-events: none;
 }
-.events .event .title .event-title {
+.events .event .title .event-title, .events .activity .title .activity-title {
   font-size: 1rem;
   font-weight: 400;
   margin-left: 20px;
@@ -315,17 +315,17 @@ body {
   color: var(--primary-clr);
   font-size: 0.5rem;
 }
-.events .event:hover i {
+.events .event:hover i, .events .activity:hover i {
   color: #fff;
 }
-.events .event .event-time {
+.events .event .event-time, .events .activity .activity-time {
   font-size: 0.8rem;
   font-weight: 400;
   color: #878895;
   margin-left: 15px;
   pointer-events: none;
 }
-.events .event:hover .event-time {
+.events .event:hover .event-time, .events .activity:hover .event-time {
   color: #fff;
 }
 /* add tick in event after */
@@ -343,7 +343,7 @@ body {
   color: var(--primary-clr);
   transform: translateY(-50%);
 }
-.events .event:hover::after {
+.events .event:hover::after, .events .activity:hover::after {
   display: flex;
 }
 .add-event {
@@ -392,7 +392,7 @@ body {
   transition: max-height 0.5s ease;
 }
 .add-event-wrapper.active {
-  max-height: 300px;
+  max-height: 500px;
 }
 .add-event-header {
   width: 100%;
@@ -421,7 +421,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  padding: 20px;
+  padding: 5px 20px 0 20px;
 }
 .add-event-body .add-event-input {
   width: 100%;
@@ -581,4 +581,129 @@ nav{
 .SetToday-btn{
   width: 60%;
   min-width: 120px;
+}
+
+.activity{
+  position: relative;
+}
+
+.calendar .days .activity::after{
+  content: "";
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  width: 75%;
+  height: 6px;
+  border-radius: 30px;
+  transform: translateX(-50%);
+  background-color: #006f8c;
+}
+
+.calendar .days .day:hover.activity::after {
+  background-color: #fff;
+}
+
+.calendar .days .active.activity::after {
+  background-color: #fff;
+  bottom: 20%;
+}
+
+.events .activity::after{
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  font-size: 3rem;
+  line-height: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.3;
+  color: #006f8c;
+  transform: translateY(-50%);
+}
+
+  .events .expired::after{
+  content: "✗";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  font-size: 3rem;
+  line-height: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.3;
+  color: #656b6c;
+  transform: translateY(-50%);
+}
+
+.events .activity:hover {
+  background: linear-gradient(90deg, #006f8c, transparent);
+}
+
+.events .activity i {
+  color: #006f8c;
+  font-size: 0.5rem;
+}
+
+textarea{
+  min-height: 50px;
+  width: 100%;
+  height: 100%;
+  padding: 12px 10px;
+  box-sizing: border-box;
+  border: 1px solid #f5f5f5;
+  color: #a5a5a5;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+  resize: none;
+}
+
+.radio {
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    + .radio-label {
+      &:before {
+        content: '';
+        background: #f4f4f4;
+        border-radius: 100%;
+        border: 1px solid #f4f4f4;
+        display: inline-block;
+        width: 1.4em;
+        height: 1.4em;
+        position: relative;
+        margin-right: 1em;
+        vertical-align: middle;
+        cursor: pointer;
+        text-align: center;
+        transition: all 250ms ease;
+      }
+    }
+    &:checked {
+      + .radio-label {
+        &:before {
+          background-color: #3197EE;
+          box-shadow: inset 0 0 0 4px #f4f4f4;
+        }
+      }
+    }
+    &:focus {
+      + .radio-label {
+        &:before {
+          outline: none;
+          border-color: #3197EE;
+        }
+      }
+    }
+    + .radio-label {
+      &:empty {
+        &:before {
+          margin-right: 0;
+        }
+      }
+    }
+  }
 }

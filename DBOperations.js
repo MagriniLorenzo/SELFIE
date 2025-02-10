@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId } = require("mongodb");
+import { MongoClient, ObjectId } from "mongodb";
 const uri = "mongodb://127.0.0.1:27017";
 const dbName = "SELFIE";
 const tableNames = ["EVENT", "NOTE", "USER"];
@@ -7,7 +7,7 @@ const tableNames = ["EVENT", "NOTE", "USER"];
  * Ottiene tutti gli eventi dal db
  * @returns {Promise<WithId<Document>[]>}
  */
-const getEventsFromDB = async (username) => {
+export const getEventsFromDB = async (username) => {
     const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
@@ -15,7 +15,6 @@ const getEventsFromDB = async (username) => {
         const collection = database.collection(tableNames[0]);
 
         const events = await collection.find({id_user:username}).toArray(); // Recupera tutti gli eventi
-        console.log(events);
 
         return events; // Restituisce i dati per ulteriori elaborazioni
     } catch (error) {
@@ -30,7 +29,7 @@ const getEventsFromDB = async (username) => {
  * @param event evento da aggiungere
  * @returns {Promise<Document extends {_id: infer IdType} ? (Record<any, never> extends infer IdType ? never : IdType) : (Document extends {_id?: infer IdType} ? (unknown extends infer IdType ? ObjectId : IdType) : ObjectId)>}
  */
-const addEventOnDB = async (event) => {
+export const addEventOnDB = async (event) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
@@ -53,7 +52,7 @@ const addEventOnDB = async (event) => {
  * @param username
  * @returns {Promise<number>}
  */
-const deleteEventOnDB = async (eventId, username) => {
+export const deleteEventOnDB = async (eventId, username) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
@@ -75,7 +74,7 @@ const deleteEventOnDB = async (eventId, username) => {
  * Ottiene tutte le note dal db
  * @returns {Promise<WithId<Document>[]>}
  */
-const getNotesFromDB = async (username) => {
+export const getNotesFromDB = async (username) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
@@ -83,7 +82,6 @@ const getNotesFromDB = async (username) => {
         const collection = database.collection(tableNames[1]);
 
         const notes = await collection.find({id_user:username}).toArray(); // Recupera tutte le note
-        console.log(notes);
 
         return notes; // Restituisce i dati per ulteriori elaborazioni
     } catch (error) {
@@ -93,7 +91,7 @@ const getNotesFromDB = async (username) => {
     }
 };
 
-const addNoteOnDB = async (note) => {
+export const addNoteOnDB = async (note) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
@@ -110,7 +108,7 @@ const addNoteOnDB = async (note) => {
     }
 };
 
-const deleteNoteOnDB = async (noteId,username) => {
+export const deleteNoteOnDB = async (noteId,username) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
@@ -128,7 +126,7 @@ const deleteNoteOnDB = async (noteId,username) => {
     }
 };
 
-const updateNoteOnDB = async (id, note) => {
+export const updateNoteOnDB = async (id, note) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
@@ -159,7 +157,7 @@ const updateNoteOnDB = async (id, note) => {
  * @param username dell'utente da individuare
  * @returns {Promise<Document & {_id: InferIdType<Document>}>}
  */
-const getAccountFromDB = async (username) => {
+export const getAccountFromDB = async (username) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
@@ -181,7 +179,7 @@ const getAccountFromDB = async (username) => {
  * @param password password dell'account
  * @returns {Promise<boolean>} true se l'account è stato aggiunto, false altrimenti
  */
-const addAccountOnDB = async (username, password) => {
+export const addAccountOnDB = async (username, password) => {
         const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
@@ -203,7 +201,3 @@ const addAccountOnDB = async (username, password) => {
         await client.close();
     }
 };
-
-module.exports = { getEventsFromDB, addEventOnDB, deleteEventOnDB,
-                    getNotesFromDB, addNoteOnDB, deleteNoteOnDB,
-                    updateNoteOnDB, addAccountOnDB, getAccountFromDB};
