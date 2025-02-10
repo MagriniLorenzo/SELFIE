@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meteo</title>
+    <link rel="stylesheet" href="style_meteo.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="search-box">
+                <input type="text" placeholder="Enter your location" class="input-box">
+
+                <button id="searchBtn"></button>
+            </div>
+        </div>
+
+        <div class="location-not-found">
+            <h1>Sorry, Location not found!!!</h1>
+            <img src="image/404.png" alt="404 Error">
+        </div>
+
+        <div class="weather-body">
+
+            <h1 id="city"></h1>
+
+            <img src="image/cloud.png" alt="Weather Image" class="weather-img">
+
+            <div class="weather-box">
+                <h2 class="temperature">0 <sup>°C</sup></h2>
+                <h2 class="description">light rain</h2>
+            </div>         
+        </div>
+    </div>
+
+
+    <script src="script_meteo.js"></script>
+</body>
+</html>

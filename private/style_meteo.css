@@ -1,0 +1,86 @@
+.search-box{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-box input{
+    width: 85%;
+    text-transform: capitalize;
+    padding: 10px 6px;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(5, 5, 5, 0.3);
+}
+
+.search-box button{
+    width: 25px;
+    height: 25px;
+    border: none;
+    cursor: pointer;
+    background-color: white;
+    background-image: url('image/lente.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.weather-body{
+    display: flex;
+    justify-content: space-between;
+}
+
+.weather-body img{
+    width: 20%;
+}
+
+.weather-box{
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    text-align: center;
+}
+
+.weather-box .temperature{
+    margin: 0px;
+}
+
+.weather-box .description{
+    text-transform: capitalize;
+    margin: 0px;
+}
+
+.location-not-found{
+    margin-top: 20px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.location-not-found h1{
+    font-size: 20px;
+    color: #6b6b6b;
+    margin-block-end: 15px;
+}
+.location-not-found img{
+    width: 80%;
+}
+
+#city {
+    text-align: center;
+    text-transform: capitalize;
+    margin: 20px;
+}
+
+.meteo-widget {
+    padding-bottom: 0px;
+}
+
+@media (max-width: 768px) {
+
+    .weather-body img{
+        width: 40%;
+    }
+}

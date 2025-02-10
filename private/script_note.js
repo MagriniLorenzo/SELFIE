@@ -2,7 +2,7 @@ let notesArr = [];
 
 let notesContainer,notesList,addNoteBtn,
     addNoteWrapper,noteTitleInput,noteContentInput,
-    submitNoteBtn,closeNoteBtn,noteCategoriesInput;
+    submitNoteBtn,closeNoteBtn,noteCategoriesInput,closebtn,editNoteBtn,deleteNoteBtn;
 
 document.addEventListener("DOMContentLoaded", () => {
     notesContainer = document.querySelector(".notes-container");
@@ -15,6 +15,15 @@ document.addEventListener("DOMContentLoaded", () => {
     closeNoteBtn = document.querySelector(".close-note-btn");
     noteCategoriesInput = document.querySelector(".note-categories");
     document.querySelector("#LogOut").addEventListener("click", logOut);
+
+    closebtn = document.getElementById("closeFullNote");
+    editNoteBtn = document.querySelector(".edit-note-btn");
+    deleteNoteBtn = document.querySelector(".delete-note-btn");
+    fullNoteWrapper = document.querySelector(".full-note-wrapper");
+    fullNoteTitle = document.querySelector(".full-note-title");
+    fullNoteCategories = document.querySelector(".full-note-categories");
+    fullNoteContent = document.querySelector(".full-note-content");
+    fullNoteDates = document.querySelector(".full-note-dates");
 
     addEvent();
 
@@ -40,32 +49,93 @@ function displayNotes() {
         const noteElement = document.createElement("div");
         noteElement.classList.add("note");
         noteElement.setAttribute("data-id", note._id);
+        const truncatedContent = note.content.length > 200 ? note.content.slice(0, 200) + "..." : note.content;
+
         noteElement.innerHTML = `
                 <div class="nota">
                     <div class="content">
                         <h3 class="note-title">${note.title}</h3>
-                        <p class="note-categories">Categorie: ${note.categories}</p>
-                        <p class="note-content">${note.content}</p>
-                        <p class="note-dates">Creata il: ${note.createdAt} - Ultima modifica: ${note.updatedAt}</p>
+                        <!-- <p class="note-categories">Categorie: ${note.categories}</p> -->
+                        <p class="note-content">${truncatedContent}</p>
+                        <!-- <p class="note-dates">Creata il: ${note.createdAt} - Ultima modifica: ${note.updatedAt}</p> -->
                     </div>
-                    <div class="dropdown">
+                    <!-- <div class="dropdown">
                         <button class="dropdown-toggle">&#8226;&#8226;&#8226;</button>
                         <div class="dropdown-menu hidden">
                             <button class="edit-note-btn" data-id="${note._id}">Modifica</button>
                             <button class="delete-note-btn" data-id="${note._id}">Elimina</button>
                         </div>
-                    </div>
+                    </div> -->
                 </div>`;
 
+        /*
         const dropdownToggle = noteElement.querySelector(".dropdown-toggle");
         const dropdownMenu = noteElement.querySelector(".dropdown-menu");
 
-        dropdownToggle.addEventListener("click", () => {
+        dropdownToggle.addEventListener("click", (event) => {
+            // Chiude tutti i menu aperti prima di aprirne uno nuovo
+            document.querySelectorAll(".dropdown-menu").forEach(menu => {
+                if (menu !== dropdownMenu) menu.classList.add("hidden");
+            });
+
             dropdownMenu.classList.toggle("hidden");
+            event.stopPropagation(); // Impedisce la chiusura immediata
+        });
+
+        // Chiude il menu se si clicca fuori
+        document.addEventListener("click", (event) => {
+            if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
+                dropdownMenu.classList.add("hidden");
+            }
+        });*/
+
+        // Evento per aprire la nota completa quando si clicca sul titolo
+        noteElement.querySelector(".note-title").addEventListener("click", () => {
+            fullNoteWrapper.classList.add("active");
+            openFullNoteView(note);
         });
 
         notesList.appendChild(noteElement);
     });
+}
+
+function openFullNoteView(note) {
+    // Imposta i contenuti della nota completa
+    fullNoteTitle.textContent = note.title;
+    fullNoteCategories.textContent = note.categories;
+    fullNoteContent.textContent = note.content;
+    fullNoteDates.textContent = `Creata il: ${note.createdAt} - Ultima modifica: ${note.updatedAt}`;
+    editNoteBtn.setAttribute("data-id", note._id);
+    deleteNoteBtn.setAttribute("data-id", note._id);
+
+    // Mostra la vista completa della nota
+    fullNoteWrapper.classList.remove("hidden");
+
+    // Eventi per la chiusura della vista completa
+    closebtn.addEventListener("click", () => {
+        fullNoteWrapper.classList.remove("active");
+    });
+
+    deleteNoteBtn.removeEventListener("click", handleDeleteNote);
+    editNoteBtn.removeEventListener("click", handleEditNote);
+
+    deleteNoteBtn.addEventListener("click", handleDeleteNote);
+    editNoteBtn.addEventListener("click", handleEditNote);
+}
+
+function handleDeleteNote(event) {
+    const noteId = event.target.getAttribute("data-id");
+    if (noteId) {
+        deleteNote(noteId);
+    }
+}
+
+function handleEditNote(event) {
+    const noteId = event.target.getAttribute("data-id");
+    const index = notesArr.findIndex(note => note._id === noteId);
+    if (index !== -1) {
+        editNote(index);
+    }
 }
 
 async function addNote() {
@@ -100,10 +170,16 @@ async function addNote() {
 }
 
 function editNote(index) {
+    fullNoteWrapper.classList.remove("active");
     const noteToEdit = notesArr[index];
     noteTitleInput.value = noteToEdit.title;
     noteContentInput.innerHTML = noteToEdit.content;
     noteCategoriesInput.value = noteToEdit.categories;
+
+
+    document.querySelectorAll(".dropdown-menu").forEach(menu => {
+        menu.classList.add("hidden");
+    });
 
     // FIX: Imposta la modalità su "edit" e salva l'indice della nota da modificare
     submitNoteBtn.dataset.mode = "edit";
@@ -150,6 +226,7 @@ async function deleteNote(noteId) {
         await axios.delete(`http://localhost:3000/notes/${noteId}`);
         notesArr = notesArr.filter((note) => note._id !== noteId);
         displayNotes();
+        resetForm();
         alert("Nota eliminata con successo!");
     } catch (error) {
         console.error(error);
@@ -178,12 +255,13 @@ function addEvent() {
         }
     });
 
+    /*
     document.addEventListener("click", function (event) {
         if (event.target.classList.contains("delete-note-btn")) {
             const noteId = event.target.getAttribute("data-id");
             if (noteId) deleteNote(noteId);
         }
-    });
+    });*/
 }
 
 function resetForm() {
@@ -191,6 +269,7 @@ function resetForm() {
     noteCategoriesInput.value = "";
     noteContentInput.innerHTML = "";
     addNoteWrapper.classList.remove("active");
+    fullNoteWrapper.classList.remove("active");
 
     // FIX: Resetta la modalità in modo che l'evento corretto venga applicato dopo
     submitNoteBtn.dataset.mode = "add";

@@ -1,4 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+
+    weather("Bologna");
+
+    // Seleziona il contenitore dei widget
+    var grid = GridStack.init({
+        cellHeight: 80,
+        minRow: 1,
+        float: true,
+        disableOneColumnMode: true,
+    });
+
+
     const listaEventi = document.getElementById("events-list");
     const currentWeek = document.getElementById("current-week");
     const weekDaysContainer = document.querySelector(".week-days");
@@ -28,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         weekDaysContainer.innerHTML = weekDays.map(day => {
             const dayName = day.toLocaleDateString('it-IT', { weekday: 'short' });
             const isToday = normalizeDate(day).getTime() === normalizeDate(dataCorrente).getTime();
-            return `<div class="week-day ${isToday ? 'today' : ''}" data-date="${day.toLocaleDateString("it-IT")}">${dayName} ${day.getDate()}</div>`;
+            return `<div class="week-day ${isToday ? 'today' : ''}" data-date="${day.toLocaleDateString("it-IT")}">${dayName}<br>${day.getDate()}</div>`;
         }).join('');
     }
 
@@ -65,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(dati => {
                 if (notesList) {
                     notesList.innerHTML = dati.length
-                        ? dati.map(nota => {
+                        ? dati.slice(0, 3).map(nota => {
                             const maxLength = 50; // Lunghezza massima dell'estratto
                             let contentPreview = nota.content;
 
@@ -159,4 +172,89 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.querySelector("#LogOut").addEventListener("click", logOut);
+
+let inputBox = document.querySelector('.input-box');
+const searchBtn = document.getElementById('searchBtn');
+const weather_img = document.querySelector('.weather-img');
+const temperature = document.querySelector('.temperature');
+const description = document.querySelector('.description');
+let cityN = document.getElementById('city');
+
+const location_not_found = document.querySelector('.location-not-found');
+const weather_body = document.querySelector('.weather-body');
+
+async function weather(city){
+    const api_key = "fa8f1299cf20ad11a0a352cc63ab9499";
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${api_key}&lang=it`;
+
+    const weather_data = await fetch(`${url}`).then(response => response.json());
+
+    if(weather_data.cod === `404`){
+        location_not_found.style.display = "flex";
+        weather_body.style.display = "none";
+        console.log("error");
+        return;
+    }
+    cityN.textContent = city;
+    inputBox.value = "";
+    location_not_found.style.display = "none";
+    weather_body.style.display = "flex";
+    temperature.innerHTML = `${Math.round(weather_data.main.temp - 273.15)}°C`;
+    description.innerHTML = `${weather_data.weather[0].description}`;
+
+    const localOffset = new Date().getTimezoneOffset() * 60;
+    const timezoneOffset = (weather_data.timezone) + localOffset;
+    
+
+    const currentTimeUTC = Math.floor(Date.now() / 1000);
+    const currentTime = currentTimeUTC + timezoneOffset;
+
+    const sunrise = weather_data.sys.sunrise + timezoneOffset;
+    const sunset = weather_data.sys.sunset + timezoneOffset;
+
+    let isNight = currentTime < sunrise || currentTime > sunset;
+
+    if (isNight && weather_data.weather[0].main == 'Clear') {
+        weather_img.src = "/private/image/moon.png";
+    } else if(isNight && weather_data.weather[0].main == 'Clouds') {
+        weather_img.src = "/private/image/clouds_moon.png";
+    }else {
+        switch (weather_data.weather[0].main) {
+            case 'Thunderstorm':
+                weather_img.src = "/private/image/thunderstorm.svg";
+                break;
+            case 'Drizzle':
+                weather_img.src = "/private/image/drizzle.svg";
+                break;
+            case 'Rain':
+                weather_img.src = "/private/image/rain.svg";
+                break;
+            case 'Snow':
+                weather_img.src = "/private/image/snow.svg";
+                break;
+            case 'Clear':
+                weather_img.src = "/private/image/clear.svg";
+                break;
+            case 'Clouds':
+                weather_img.src = "/private/image/clouds.svg";
+                break;
+            case 'Mist':
+            case 'Smoke':
+            case 'Haze':
+            case 'Dust':
+            case 'Fog':
+            case 'Sand':
+            case 'Ash':
+            case 'Squall':
+            case 'Tornado':
+                weather_img.src = "/private/image/atmosphere.svg";
+                break;
+        }
+    }
+
+}
+
+    searchBtn.addEventListener('click', ()=>{
+        weather(inputBox.value);
+    });
 });
