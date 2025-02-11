@@ -22,6 +22,12 @@
 
   <div class="eInput">
     <input type="text" onkeyup="filterEntries()" placeholder="Cerca fra le tue note" id="search">
+    <select id="sortOptions" onchange="sortNotes()">
+      <option value="date">Ordina per Data</option>
+      <option value="lastModified">Ordina per Ultima Modifica</option>
+      <option value="title">Ordina per Titolo</option>
+      <option value="lung">Ordina per Lunghezza</option>
+    </select>
   </div>
   
   <div class="notes-list">
@@ -47,20 +53,21 @@
 
 <div class="full-note-wrapper">
   <div class="full-note">
-    <h3 class="full-note-title"></h3>
+    <div class="close-btn">
+      <button id="closeFullNote">Chiudi</button>
+    </div>
+      <h2 class="full-note-title"></h2>
       <p class="full-note-categories"></p>
       <p class="full-note-content"></p>
-      <p class="full-note-dates"></p>
-      <button class="edit-note-btn">Modifica</button>
-      <button class="delete-note-btn">Elimina</button>
-      <button class="close-note-btn" id="closeFullNote">Chiudi</button>
+      <div class="footer-note">
+        <p class="full-note-dates"></p>
+        <button class="edit-note-btn">Modifica</button>
+        <button class="delete-note-btn">Elimina</button>
+      </div>
+    </div>
+  </div>
 </div>
-</div>
 
-
-
-
-</div>
 <script>
   //Quill
   var quill = new Quill('#editor', {

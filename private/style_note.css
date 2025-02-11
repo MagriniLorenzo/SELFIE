@@ -96,6 +96,8 @@ button {
 }
 
 .full-note {
+    display: flex;
+    flex-direction: column;
     width: 50%;
     height: 70vh;
     background-color: #fff;
@@ -141,28 +143,39 @@ button {
     background-color: #d32f2f;
 }
 
+.close-btn {
+    text-align: right;
+}
+
 .add-note-form button:hover {
     background-color: #45a049;
 }
 
 button.edit-note-btn,
 button.delete-note-btn {
-
-    background-color: white;
-    margin-top: 10px;
     width: 50%;
-    margin-right: 5%;
     color: black;
+    margin: 0px 10px;
 }
 
 .eInput {
+    display: flex;
+    gap: 10px;
     margin-bottom: 15px;
 }
 
 .eInput input {
-    width: 100%;
+    width: 75%;
     height: 50px;
     padding-left: 5px;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(5, 5, 5, 0.3);
+}
+
+.eInput select {
+    width: 25%;
     outline: none;
     border: none;
     border-radius: 5px;
@@ -236,6 +249,28 @@ h1{
     justify-self: stretch;
 }
 
+.full-note-content{
+    margin-top: 20px;
+    flex-grow: 1;
+    overflow-y: auto; /* Abilita lo scroll */
+}
+
+.footer-note{
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+
+}
+
+.full-note-dates {
+    width: 60vw;
+}
+
+.full-note-categories{
+    color: grey;
+    font-size: small;
+}
+
 @media screen and (max-width: 600px) {
     .notes-container {
         width: 100%;
@@ -260,6 +295,20 @@ h1{
 
         width: 95%;
     
+    }
+
+    .footer-note{
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    
+    }
+
+    .full-note-dates {
+        width: 100%;
+        font-size: small;
     }
 }
 

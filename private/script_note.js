@@ -37,10 +37,42 @@ async function fetchNotes() {
         const response = await axios.get("http://localhost:3000/notes");
         notesArr = response.data;
         console.log(response.data);
+
+
+        notesArr.sort((a, b) => {
+            const dateA = new Date(a.createdAt.split("/").reverse().join("-"));
+            const dateB = new Date(b.createdAt.split("/").reverse().join("-"));
+            return dateB - dateA; // Dalla più recente alla più vecchia
+        });
+
+
     } catch (error) {
         console.error("Errore:", error);
     }
 }
+
+function sortNotes() {
+    let criteria = document.getElementById("sortOptions").value;
+
+    notesArr.sort((a, b) => {
+        if (criteria === "title") {
+            return a.title.localeCompare(b.title);
+        } else if (criteria === "date") {
+            const dateA = new Date(a.createdAt.split("/").reverse().join("-"));
+            const dateB = new Date(b.createdAt.split("/").reverse().join("-"));
+            return dateB - dateA; // Dalla più recente alla più vecchia
+        } else if (criteria === "lastModified") {
+            const dateA = new Date(a.updatedAt.split("/").reverse().join("-"));
+            const dateB = new Date(b.updatedAt.split("/").reverse().join("-"));
+            return dateB - dateA; // Dalla più recente alla più vecchia
+        } else if (criteria === "lung") {
+            return a.content.length - b.content.length; // Dalla più corta alla più lunga
+        }
+    });
+
+    displayNotes();
+}
+
 
 function displayNotes() {
     notesList.innerHTML = "";
