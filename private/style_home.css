@@ -146,10 +146,11 @@ body {
 nav{
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content:right;
     width:80%;
-    height: 10%;
+    height: 20%;
 }
 
 nav > button{
@@ -161,6 +162,7 @@ nav > button{
     border-radius: 5px;
     padding: 10px;
     max-height: 50px;
+    margin: 5px;
 }
 
 #widget-calendar {

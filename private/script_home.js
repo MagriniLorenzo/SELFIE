@@ -1,11 +1,9 @@
 let listaEventi, currentWeek, weekDaysContainer, eventsTodayTitle, notesList;
 
-let inputBox, searchBtn, weather_img, temperature, description, cityN, location_not_found, weather_body;
+let inputBox, searchBtn, weather_img, temperature, description, cityN,
+    location_not_found, weather_body, today, resetTodayBtn;
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    weather("Bologna");
-
+document.addEventListener("DOMContentLoaded", async () => {
     listaEventi = document.getElementById("events-list");
     currentWeek = document.getElementById("current-week");
     weekDaysContainer = document.querySelector(".week-days");
@@ -21,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     location_not_found = document.querySelector('.location-not-found');
     weather_body = document.querySelector('.weather-body');
+    resetTodayBtn = document.querySelector('.resetToday-btn');
 
     // Seleziona il contenitore dei widget
     var grid = GridStack.init({
@@ -30,36 +29,21 @@ document.addEventListener("DOMContentLoaded", () => {
         disableOneColumnMode: true,
     });
 
+    today = await getToday();
+
+    if(!today){
+        return;
+    }
+
     displayWeekDays();
     displayCurrentWeek();
-    recuperaEventi(new Date());
+
+    await loadEvents(today);
     recuperaNote();
 
-    if (weekDaysContainer) {
-        weekDaysContainer.addEventListener("click", (e) => {
-            if (e.target.classList.contains("week-day")) {
-                const selectedDay = weekDaysContainer.querySelector(".week-day.selected");
-                if (selectedDay) {
-                    selectedDay.classList.remove("selected");
-                }
-                e.target.classList.add("selected");
+    await initHome();
 
-                let formattedDate = e.target.getAttribute('data-date').split("/").reverse().join("-")
-                const clickedDate = new Date(formattedDate);
-                if (normalizeDate(clickedDate).getTime() === normalizeDate(new Date()).getTime()) {
-                    eventsTodayTitle.textContent = "Eventi di Oggi";
-                } else {
-                    const giorniSettimana = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
-                    const dayOfWeek = giorniSettimana[clickedDate.getDay()];
-
-                    // let dayLong = clickedDate.toLocaleDateString('it-IT', { weekday: 'long' });
-                    eventsTodayTitle.textContent = `Eventi di ${dayOfWeek}`;
-                }
-                recuperaEventi(clickedDate);
-            }
-        });
-        preSelectToday();
-    }
+    await weather("Bologna");
 
     // Aggiungi evento per tutto il widget calendar-widget tranne che sui giorni
     document.querySelector(".calendar-widget").addEventListener("click", (e) => {
@@ -85,6 +69,16 @@ document.addEventListener("DOMContentLoaded", () => {
         weather(inputBox.value);
     });
 
+    resetTodayBtn.addEventListener("click",  async ()=>{
+        await setToday(new Date());
+        await initHome();
+    });
+
+    window.addEventListener("pageshow", (event) => {
+        if (event.persisted) {
+            console.log("Pagina caricata dalla cache! Aggiorno i dati...");
+        }
+    });
 });
 
 
@@ -106,7 +100,7 @@ function getWeekDays(date) {
 function displayWeekDays() {
     if (!weekDaysContainer) return;
 
-    const dataCorrente = new Date();
+    const dataCorrente = today;
     const weekDays = getWeekDays(dataCorrente);
     weekDaysContainer.innerHTML = weekDays.map(day => {
         const dayName = day.toLocaleDateString('it-IT', { weekday: 'short' });
@@ -116,32 +110,34 @@ function displayWeekDays() {
 }
 
 function displayCurrentWeek() {
-    const dataCorrente = new Date();
-    let formattedDate = dataCorrente.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+    let formattedDate = today.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
     formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
     if (currentWeek) {
         currentWeek.textContent = `${formattedDate}`;
     }
 }
 
-function recuperaEventi(data) {
-    fetch("http://localhost:3000/events")
-        .then(res => res.json())
-        .then(dati => {
-            const eventiDaMostrare = dati.filter(evento => {
-                // const dataEvento = new Date(evento.year, evento.month - 1, evento.day);
-                // return normalizeDate(dataEvento).getTime() === normalizeDate(data).getTime();
-                return normalizeDate(data) >= normalizeDate(new Date(evento.start)) && normalizeDate(data) <= normalizeDate(new Date(evento.end));
-            });
+async function loadEvents(data) {
+    try {
+        const response = await fetch("http://localhost:3000/events");
+        if (!response.ok){
+            throw new Error("Errore nel recupero degli eventi");
+        }
 
-            if (listaEventi) {
+        const dati = await response.json();
+        const eventiDaMostrare = dati.filter(event =>
+            normalizeDate(data) >= normalizeDate(new Date(event.start)) &&
+            normalizeDate(data) <= normalizeDate(new Date(event.end))
+        );
 
-                listaEventi.innerHTML = eventiDaMostrare.length
-                    ? eventiDaMostrare.map(formatEvent).join('')
-                    : '<li>Nessun evento per oggi!</li>';
-            }
-        })
-        .catch(console.error);
+        if (listaEventi) {
+            listaEventi.innerHTML = eventiDaMostrare.length
+                ? eventiDaMostrare.map(formatEvent).join('')
+                : '<li>Nessun evento per oggi!</li>';
+        }
+    } catch (error) {
+        console.error("Errore nel caricamento degli eventi:", error);
+    }
 }
 
 function recuperaNote() {
@@ -170,12 +166,12 @@ function recuperaNote() {
         .catch(console.error);
 }
 
-const preSelectToday = () => {
-    const today = weekDaysContainer.querySelector(".today");
-    if (today) {
-        today.classList.add("selected");
+const preSelectToday = async () => {
+    const tempToday = weekDaysContainer.querySelector(".today");
+    if (tempToday) {
+        tempToday.classList.add("selected");
         eventsTodayTitle.textContent = "Eventi di Oggi";
-        recuperaEventi(new Date());
+        await loadEvents(today);
     }
 };
 
@@ -229,7 +225,7 @@ async function weather(city){
     temperature.innerHTML = `${Math.round(weather_data.main.temp - 273.15)}°C`;
     description.innerHTML = `${weather_data.weather[0].description}`;
 
-    const localOffset = new Date().getTimezoneOffset() * 60;
+    const localOffset = today.getTimezoneOffset() * 60;
     const timezoneOffset = (weather_data.timezone) + localOffset;
     
 
@@ -241,9 +237,9 @@ async function weather(city){
 
     let isNight = currentTime < sunrise || currentTime > sunset;
 
-    if (isNight && weather_data.weather[0].main == 'Clear') {
+    if (isNight && weather_data.weather[0].main === 'Clear') {
         weather_img.src = "/private/image/moon.png";
-    } else if(isNight && weather_data.weather[0].main == 'Clouds') {
+    } else if(isNight && weather_data.weather[0].main === 'Clouds') {
         weather_img.src = "/private/image/clouds_moon.png";
     }else {
         switch (weather_data.weather[0].main) {
@@ -282,3 +278,65 @@ async function weather(city){
 }
 
 
+async function getToday() {
+    try {
+        const response = await fetch("http://localhost:3000/get-today");
+        if (!response.ok) {
+            throw new Error("Errore nel recupero della data");
+        }
+        const data = await response.json();
+        return new Date(data.today); // Converte la stringa ISO in oggetto Date
+    } catch (error) {
+        console.error("Errore:", error);
+        return null;
+    }
+}
+
+async function setToday(date) {
+    today = new Date(date);
+    month = today.getMonth();
+    year = today.getFullYear();
+
+    try {
+        const response = await fetch("http://localhost:3000/setToday", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ newDate : today })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || "Errore nell'invio della data");
+        }
+    } catch (error) {
+        console.error("Errore:", error);
+    }
+}
+
+async function initHome() {
+    if (weekDaysContainer) {
+        weekDaysContainer.addEventListener("click", async (e) => {
+            if (e.target.classList.contains("week-day")) {
+                const selectedDay = weekDaysContainer.querySelector(".week-day.selected");
+                if (selectedDay) {
+                    selectedDay.classList.remove("selected");
+                }
+                e.target.classList.add("selected");
+
+                let formattedDate = e.target.getAttribute('data-date').split("/").reverse().join("-")
+                const clickedDate = new Date(formattedDate);
+                if (normalizeDate(clickedDate).getTime() === normalizeDate(today).getTime()) {
+                    eventsTodayTitle.textContent = "Eventi di Oggi";
+                } else {
+                    const giorniSettimana = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+                    const dayOfWeek = giorniSettimana[clickedDate.getDay()];
+
+                    // let dayLong = clickedDate.toLocaleDateString('it-IT', { weekday: 'long' });
+                    eventsTodayTitle.textContent = `Eventi di ${dayOfWeek}`;
+                }
+                await loadEvents(clickedDate);
+            }
+        });
+        await preSelectToday();
+    }
+}

@@ -4,13 +4,9 @@ var calendar, date, daysContainer, prev, next, todayBtn, gotoBtn, dateInput,
     addEventCloseBtn, addEventTitle, addEventFrom, addEventTo, addEventSubmit,
     addEventDescription, eventType, divEventStart, viewActivityBtn, timeMachineBtn,
     timeMachineWrapper, timeMachineCloseBtn,viewActivityWrapper, viewActivityCloseBtn,
-    viewActivityBody;
+    viewActivityBody, resetTodayBtn, logOutBtn;
 
-let today = new Date();
-let activeDay;
-let month = today.getMonth();
-let year = today.getFullYear();
-// let tempToday;
+let today, activeDay, month, year;
 
 const months = [
   "Gennaio",
@@ -29,7 +25,14 @@ const months = [
 let eventsArr = [];
 
 // Evento DOMContentLoaded
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  today= await getToday();
+  if (!today){
+    return;
+  }
+  month = today.getMonth();
+  year = today.getFullYear();
+
   // Inizializzazione delle variabili
   calendar = document.querySelector(".calendar");
   date = document.querySelector(".date");
@@ -59,8 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
   viewActivityWrapper = document.querySelector(".view-activity-wrapper");
   viewActivityCloseBtn = document.querySelector(".view-activity-wrapper .add-event-header .close");
   viewActivityBody = document.querySelector(".view-activity-body");
-  document.querySelector("#LogOut").addEventListener("click", logOut);
-  document.querySelector(".SetToday-btn").addEventListener("click", setToday);
+  logOutBtn = document.querySelector("#LogOut");
+  resetTodayBtn = document.querySelector(".resetToday-btn");
 
 
 
@@ -293,8 +296,9 @@ function updateEvents(date) {
         </div>`;
     }else if(event.start===""&&data.toLocaleDateString("it-IT")===dayEnd.toLocaleDateString("it-IT")){
       let formattedEnd = (new Date(event.end)).toLocaleTimeString("it-IT", formatOptions);
-
-      let type= (new Date())>(new Date(event.end))?"activity expired":"activity";
+      // let tempToday = new Date();
+      // tempToday.setDate(today.getDate());
+      let type= (today)>(new Date(event.end))?"activity expired":"activity";
       // Aggiungi l'evento alla variabile events come HTML
       events += `
         <div class="${type}">
@@ -360,10 +364,17 @@ function addEvent() {
 
   next.addEventListener("click", nextMonth);
 
-  todayBtn.addEventListener("click", () => {
-    today = new Date();
-    month = today.getMonth();
-    year = today.getFullYear();
+  logOutBtn.addEventListener("click", logOut);
+
+  todayBtn.addEventListener("click", async () => {
+    if(dateInput.value) {
+      await setToday(dateInput.value);
+      initCalendar();
+    }
+  });
+
+  resetTodayBtn.addEventListener("click",  async ()=>{
+    await setToday(new Date());
     initCalendar();
   });
 
@@ -544,6 +555,11 @@ function addEvent() {
       removeActivity(e);
   });
 
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      console.log("Pagina caricata dalla cache! Aggiorno i dati...");
+    }
+  });
 }
 
 function removeEvent(type, e){
@@ -579,7 +595,8 @@ function removeActivity(e){
     const eventElement = e.target.closest(".activity")
 
     // Trova tutte le attività
-    const activity = eventsArr.filter((a)=>a.start==="");
+    let activity = eventsArr.filter((a)=>a.start==="");
+    activity.sort((a, b) => a.end.localeCompare(b.end));
 
     let nodes = Array.from(e.target.parentNode.children);
     // Trova l'indice dell'elemento cliccato tra i figli
@@ -631,14 +648,25 @@ async function logOut(){
       .catch(console.error);
 }
 
-function setToday() {
-  if(dateInput.value){
-    today = new Date(dateInput.value);
+async function setToday(date) {
+    today = new Date(date);
     month = today.getMonth();
     year = today.getFullYear();
 
-    initCalendar();
-  }
+    try {
+      const response = await fetch("http://localhost:3000/setToday", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newDate : today })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Errore nell'invio della data");
+      }
+    } catch (error) {
+      console.error("Errore:", error);
+    }
 }
 
 function normalizeDate(date) {
@@ -671,8 +699,14 @@ function isEventInActiveDay(event){
 function loadActivity(){
   const activity = eventsArr.filter((a)=> a.start==="");
   let newActivity = "";
+
+  //ordino le attività in ordine crescente per data e le visualizzo
+  activity.sort((a, b) => a.end.localeCompare(b.end));
+
   activity.forEach((a)=>{
-    let type= (new Date())>(new Date(a.end))?"activity expired":"activity";
+    // const tempToday = new Date();
+    // tempToday.setDate(today.getDate());
+    let type= (today)>(new Date(a.end))?"activity expired":"activity";
     newActivity +=`
         <div class="${type}">
           <div class="title">
@@ -695,7 +729,7 @@ function formatDateToLocalISO(date) {
 
 function setEventData(){
   // Ottieni data e ora attuali in fuso orario locale
-  const now = new Date();
+  let now = today;
   now.setDate(activeDay);
   const nowFormatted = formatDateToLocalISO(now);
 
@@ -706,5 +740,16 @@ function setEventData(){
   // Imposta i valori negli input
   addEventFrom.value = nowFormatted;
   addEventTo.value = laterFormatted;
+}
 
+async function getToday() {
+  try {
+    const response = await fetch("http://localhost:3000/get-today");
+    if (!response.ok) throw new Error("Errore nel recupero della data");
+    const data = await response.json();
+    return new Date(data.today); // Converte la stringa ISO in oggetto Date
+  } catch (error) {
+    console.error("Errore:", error);
+    return null;
+  }
 }

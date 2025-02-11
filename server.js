@@ -1,22 +1,10 @@
-// const express = require("express");
-// const bodyParser = require("body-parser");
-// const fs = require("fs");
-// const cors = require("cors");
-// const path = require("path");
 const PORT = 3000;
 const EVENT_FILE_PATH = "./events.json";
 const NOTES_FILE_PATH = "./notes.json";
-// const session = require('express-session');
-// const passport = require('passport');
-// const LocalStrategy = require('passport-local').Strategy;
-// const bcrypt = require('bcryptjs');
-// const ICalendar = require("datebook");
-// const { getEventsFromDB, addEventOnDB, deleteEventOnDB,
-//         addAccountOnDB, getAccountFromDB, getNotesFromDB,
-//         updateNoteOnDB, deleteNoteOnDB, addNoteOnDB } = require("./DBOperations");
 import {GoogleCalendar, ICalendar} from 'datebook';
 import express from 'express';
 import session from 'express-session';
+import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import fs from 'fs';
 import cors from 'cors';
@@ -33,6 +21,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 
+app.use(cookieParser());
 // Middleware
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(bodyParser.json());
@@ -59,6 +48,15 @@ app.use((req, res, next) => {
     }
     next();
 });
+
+// Middleware per impostare la data personalizzata nella sessione e nel cookie
+// app.use((req, res, next) => {
+//     if (!req.session.today) {
+//         req.session.today = new Date(); // Data di default
+//     }
+//     res.cookie("today", req.session.today.toISOString(), { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+//     next();
+// });
 
 // Inizializza Passport.js
 app.use(passport.initialize());
@@ -249,27 +247,6 @@ app.get("/home/timer", isAuthenticated, (req, res) => {
     res.sendFile(filePath)
 });
 
-// Endpoint per servire la pagina principale
-app.get("/", (req, res) => {
-    const filePath = path.join(__dirname, "public", "index.html");
-    res.sendFile(filePath);
-});
-
-// Avvio del server
-app.listen(PORT, () => console.log(`Server in esecuzione su http://localhost:${PORT}`));
-
-/**
- * Function per verificare che variable sia un JSON non vuoto
- * @param variable in input
- * @returns {boolean} true se è un json non vuoto false altrimenti
- */
-function isNonEmptyJSON(variable) {
-    return typeof variable === 'object' &&
-        variable !== null &&
-        !Array.isArray(variable) &&
-        Object.keys(variable).length > 0;
-}
-
 // Endpoint per creare un account
 app.post("/register", async (req, res) => {
     const userData = req.body;
@@ -306,3 +283,45 @@ app.get('/logout', (req, res) => {
         res.json({ message: 'Logout effettuato' });
     });
 });
+
+// Endpoint per ottenere la data dalla sessione
+app.get("/get-today",isAuthenticated, (req, res) => {
+    // Assicurati che la sessione sia inizializzata
+    if (!req.session.today) {
+        req.session.today = new Date(); // Imposta la data alla data attuale se non esiste
+    }
+
+    let date = new Date(req.session.today).toISOString(); // Assicurati che sia un oggetto Date
+    res.json({ today: date });
+});
+
+// Endpoint per cambiare la data nella sessione (ed anche nel cookie)
+app.post("/setToday",isAuthenticated, (req, res) => {
+    const { newDate } = req.body;
+    if (!newDate || isNaN(Date.parse(newDate))) {
+        return res.status(400).json({ error: "Data non valida" });
+    }
+    req.session.today = new Date(newDate);
+    res.json({ message: `Data impostata a ${req.session.today.toISOString()}` });
+});
+
+// Endpoint per servire la pagina principale
+app.get("/", (req, res) => {
+    const filePath = path.join(__dirname, "public", "index.html");
+    res.sendFile(filePath);
+});
+
+// Avvio del server
+app.listen(PORT, () => console.log(`Server in esecuzione su http://localhost:${PORT}`));
+
+/**
+ * Function per verificare che variable sia un JSON non vuoto
+ * @param variable in input
+ * @returns {boolean} true se è un json non vuoto false altrimenti
+ */
+function isNonEmptyJSON(variable) {
+    return typeof variable === 'object' &&
+        variable !== null &&
+        !Array.isArray(variable) &&
+        Object.keys(variable).length > 0;
+}
