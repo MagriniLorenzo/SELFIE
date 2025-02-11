@@ -165,4 +165,32 @@
     "interval": 2
   },
   "id_user": "admin"
+},
+{
+  "_id": {
+    "$oid": "67ab2736e11db64681545d1d"
+  },
+  "title": "activity 1",
+  "location": "The Bar, New York, NY",
+  "description": "Let's blow off some steam with a tall cold one!",
+  "start": "",
+  "end": "2025-02-05T23:30:00",
+  "attendees": [
+    {
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "icsOptions": {
+        "rsvp": true
+      }
+    },
+    {
+      "name": "Jane Doe",
+      "email": "jane@doe.com"
+    }
+  ],
+  "recurrence": {
+    "frequency": "WEEKLY",
+    "interval": 2
+  },
+  "id_user": "admin"
 }]
