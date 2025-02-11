@@ -2,7 +2,9 @@
 var calendar, date, daysContainer, prev, next, todayBtn, gotoBtn, dateInput,
     eventDay, eventDate, eventsContainer, addEventBtn, addEventWrapper,
     addEventCloseBtn, addEventTitle, addEventFrom, addEventTo, addEventSubmit,
-    eventDescription, eventType, eventStart, eventEnd, divEventStart;
+    addEventDescription, eventType, divEventStart, viewActivityBtn, timeMachineBtn,
+    timeMachineWrapper, timeMachineCloseBtn,viewActivityWrapper, viewActivityCloseBtn,
+    viewActivityBody;
 
 let today = new Date();
 let activeDay;
@@ -42,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   eventsContainer = document.querySelector(".events");
   addEventBtn = document.querySelector(".add-event");
   addEventWrapper = document.querySelector(".add-event-wrapper");
-  addEventCloseBtn = document.querySelector(".close");
+  addEventCloseBtn = document.querySelector(".add-event-wrapper .add-event-header .close");
   addEventTitle = document.querySelector(".event-name");
   addEventFrom = document.querySelector(".event-time-from");
   addEventTo = document.querySelector(".event-time-to");
@@ -50,8 +52,16 @@ document.addEventListener("DOMContentLoaded", () => {
   addEventDescription = document.querySelector(".event-description");
   eventType= document.getElementsByName("radio");
   divEventStart= document.getElementById("eventStart");
+  viewActivityBtn = document.querySelector(".view-activity");
+  timeMachineBtn = document.querySelector(".time-machine");
+  timeMachineWrapper = document.querySelector(".time-machine-wrapper");
+  timeMachineCloseBtn = document.querySelector(".time-machine-wrapper .add-event-header .close");
+  viewActivityWrapper = document.querySelector(".view-activity-wrapper");
+  viewActivityCloseBtn = document.querySelector(".view-activity-wrapper .add-event-header .close");
+  viewActivityBody = document.querySelector(".view-activity-body");
   document.querySelector("#LogOut").addEventListener("click", logOut);
-  document.querySelector(".SetToday-btn").addEventListener("click", setToday)
+  document.querySelector(".SetToday-btn").addEventListener("click", setToday);
+
 
 
   addEvent();
@@ -80,7 +90,7 @@ function changeStatus() {
 }
 
 //function to add days in days with class day and prev-date next-date on previous month and next month days and active on today
-function initCalendar(referenceDay=today) {
+function initCalendar(referenceDay=normalizeDate(today)) {
   //setto randomicamente lo stato degli eventi passati
   changeStatus();
 
@@ -119,13 +129,24 @@ function initCalendar(referenceDay=today) {
         activity = " activity" ;
       }
     });
-    if (data.toLocaleString("it-IT")===normalizeDate(referenceDay).toLocaleString("it-IT")) {
-      activeDay = i;
-      getActiveDay(i);
-      updateEvents(i);
+    if (data.toLocaleString("it-IT")===normalizeDate(today).toLocaleString("it-IT")) {
+      if(referenceDay.toLocaleString("it-IT")===normalizeDate(today).toLocaleString("it-IT")){
+        activeDay = i;
+        getActiveDay(i);
+        updateEvents(i);
         days += `<div class="day today active${event}${activity}">${i}</div>`;
+      }else{
+        days += `<div class="day today${event}${activity}">${i}</div>`;
+      }
     } else {
+      if(referenceDay.toLocaleString("it-IT")===data.toLocaleString("it-IT")){
+        activeDay = i;
+        getActiveDay(i);
+        updateEvents(i);
         days += `<div class="day${event}${activity}">${i}</div>`;
+      }else{
+        days += `<div class="day${event}${activity}">${i}</div>`;
+      }
     }
   }
 
@@ -358,8 +379,37 @@ function addEvent() {
 
   gotoBtn.addEventListener("click", gotoDate);
 
+  //function to view activity
+  viewActivityBtn.addEventListener("click", () => {
+    //aggiungo le attività al wrapper
+    loadActivity();
+
+    viewActivityWrapper.classList.toggle("active");
+  });
+
+  viewActivityCloseBtn.addEventListener("click", () => {
+    viewActivityWrapper.classList.remove("active");
+  });
+
+
+  //function to time machine
+  timeMachineBtn.addEventListener("click", () => {
+    timeMachineWrapper.classList.toggle("active");
+  });
+
+  timeMachineCloseBtn.addEventListener("click", () => {
+    timeMachineWrapper.classList.remove("active");
+  });
+
+
+
 //function to add event
   addEventBtn.addEventListener("click", () => {
+    const selectedRadio = document.querySelector('input[name="radio"]:checked');
+    if(selectedRadio.value==="event") {
+      setEventData();
+    }
+
     addEventWrapper.classList.toggle("active");
   });
 
@@ -367,9 +417,16 @@ function addEvent() {
     addEventWrapper.classList.remove("active");
   });
 
+  // ???
   document.addEventListener("click", (e) => {
     if (e.target !== addEventBtn && !addEventWrapper.contains(e.target)) {
       addEventWrapper.classList.remove("active");
+    }
+    if(e.target !== timeMachineBtn && !timeMachineWrapper.contains(e.target)){
+      timeMachineWrapper.classList.remove("active");
+    }
+    if(e.target !== viewActivityWrapper && e.target !== viewActivityBtn){
+      viewActivityWrapper.classList.remove("active");
     }
   });
 
@@ -377,27 +434,6 @@ function addEvent() {
   addEventTitle.addEventListener("input", (e) => {
     addEventTitle.value = addEventTitle.value.slice(0, 60);
   });
-
-//allow only time in eventtime from and to
-//   addEventFrom.addEventListener("input", (e) => {
-//     addEventFrom.value = addEventFrom.value.replace(/[^0-9:]/g, "");
-//     if (addEventFrom.value.length === 2) {
-//       addEventFrom.value += ":";
-//     }
-//     if (addEventFrom.value.length > 5) {
-//       addEventFrom.value = addEventFrom.value.slice(0, 5);
-//     }
-//   });
-//
-//   addEventTo.addEventListener("input", (e) => {
-//     addEventTo.value = addEventTo.value.replace(/[^0-9:]/g, "");
-//     if (addEventTo.value.length === 2) {
-//       addEventTo.value += ":";
-//     }
-//     if (addEventTo.value.length > 5) {
-//       addEventTo.value = addEventTo.value.slice(0, 5);
-//     }
-//   });
 
 //function to add event to eventsArr
   addEventSubmit.addEventListener("click", async () => {
@@ -419,24 +455,6 @@ function addEvent() {
       }
       eventTimeFrom="";
     }
-
-    // Check correct time format (24-hour)
-    // const timeFromArr = eventTimeFrom.split(":");
-    // const timeToArr = eventTimeTo.split(":");
-    // if (
-    //     timeFromArr.length !== 2 ||
-    //     timeToArr.length !== 2 ||
-    //     timeFromArr[0] > 23 ||
-    //     timeFromArr[1] > 59 ||
-    //     timeToArr[0] > 23 ||
-    //     timeToArr[1] > 59
-    // ) {
-    //   alert("Invalid Time Format");
-    //   return;
-    // }
-    //
-    // const timeFrom = convertTime(eventTimeFrom);
-    // const timeTo = convertTime(eventTimeTo);
 
     const newEvent = {
       title: eventTitle,
@@ -510,12 +528,22 @@ function addEvent() {
   Array.from(eventType).forEach((radio)=>{
       radio.addEventListener("change",(e)=>{
       if (e.target.value === "event") {
+        setEventData();
         divEventStart.style.display = "flex";
       } else if(e.target.value === "activity"){
+        //elimino data e ora se impostate
+        addEventTo.value="";
+        addEventFrom.value="";
         divEventStart.style.display = "none";
       }
     })
   });
+
+  //function to delete activity when clicked on activity in the activity list
+  viewActivityBody.addEventListener("click", (e) => {
+      removeActivity(e);
+  });
+
 }
 
 function removeEvent(type, e){
@@ -527,7 +555,7 @@ function removeEvent(type, e){
     // Trova gli eventi del giorno selezionato
     const selectedDayEvents = eventsArr.filter(
         (event) =>{
-          return isBetween(event)||isDay(event);
+          return isBetween(event)||isActivityInActiveDay(event);
         }
     );
 
@@ -535,52 +563,63 @@ function removeEvent(type, e){
     // Trova l'indice dell'elemento cliccato tra i figli
     const indexOfClicked = nodes.indexOf(e.target);
 
-
     if (indexOfClicked !== -1) {
       const eventToDelete = selectedDayEvents[indexOfClicked];
 
-      // Rimuovi l'evento dal file JSON sul server
-      fetch(`http://localhost:3000/events`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(eventToDelete),
-      })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Errore durante l'eliminazione dell'evento");
-            }
-            let eventIndex = eventsArr.indexOf(eventToDelete);
-            // Rimuovi l'evento dall'array locale
-            eventsArr.splice(eventIndex, 1);
-
-            // Aggiorna l'interfaccia
-            updateEvents(activeDay);
-
-            // Rimuovi la classe "event" dal giorno se non ci sono più eventi
-            const activeDayEl = document.querySelector(".day.active");
-            if(type === "event"){
-              if(eventsArr.some(isDaily)){
-                activeDayEl.classList.remove(type);
-              }else if (!eventsArr.some(isBetween)){
-                // activeDayEl.classList.remove(type);
-                initCalendar(new Date(year,month,activeDay));
-              }
-            }else{
-              if (!eventsArr.some(isDay)) {
-                activeDayEl.classList.remove(type);
-              }
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-            alert(`Errore durante l'eliminazione dell'${type}.`);
-          });
+      // Rimuovi l'evento dal db
+      deleteEventOnDB(eventToDelete, type);
     } else {
       alert(`${type} non trovato.`);
     }
   }
+}
+
+function removeActivity(e){
+  if (confirm("Are you sure you want to delete this activity?")) {
+    const eventElement = e.target.closest(".activity")
+
+    // Trova tutte le attività
+    const activity = eventsArr.filter((a)=>a.start==="");
+
+    let nodes = Array.from(e.target.parentNode.children);
+    // Trova l'indice dell'elemento cliccato tra i figli
+    const indexOfClicked = nodes.indexOf(e.target);
+
+    if (indexOfClicked !== -1) {
+      const activityToDelete = activity[indexOfClicked];
+
+      // Rimuovo l'attività dal db
+      deleteEventOnDB(activityToDelete, "activity");
+    } else {
+      alert("attività non trovata.");
+    }
+  }
+}
+
+function deleteEventOnDB(eventToDelete, type){
+  // Rimuovi l'evento dal db
+  fetch(`http://localhost:3000/events`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(eventToDelete),
+  })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Errore durante l'eliminazione dell'evento");
+        }
+        let eventIndex = eventsArr.indexOf(eventToDelete);
+        // Rimuovi l'evento dall'array locale
+        eventsArr.splice(eventIndex, 1);
+
+        //aggiorna l'interfaccia
+        initCalendar(new Date(year,month,activeDay));
+      })
+      .catch((error) => {
+        console.error(error);
+        alert(`Errore durante l'eliminazione dell'${type}.`);
+      });
 }
 
 async function logOut(){
@@ -614,17 +653,58 @@ function isBetween(event){
   return data >= dayStart && data <= dayEnd;
 }
 
-function isDay(event){
+function isActivityInActiveDay(event){
   const data = new Date(year, month, activeDay);
   const endDay = normalizeDate(new Date(event.end));
 
   return endDay.toLocaleString("it-IT")===data.toLocaleString("it-IT");
 }
 
-function isDaily(event){
+function isEventInActiveDay(event){
   const data = new Date(year, month, activeDay);
   const dayStart = normalizeDate(new Date(event.start));
   const dayEnd = normalizeDate(new Date(event.end));
 
   return data.toLocaleString("it-IT") === dayStart.toLocaleString("it-IT") && data.toLocaleString("it-IT") === dayEnd.toLocaleString("it-IT");
+}
+
+function loadActivity(){
+  const activity = eventsArr.filter((a)=> a.start==="");
+  let newActivity = "";
+  activity.forEach((a)=>{
+    let type= (new Date())>(new Date(a.end))?"activity expired":"activity";
+    newActivity +=`
+        <div class="${type}">
+          <div class="title">
+            <i class="fas fa-circle"></i>
+            <h3 class="activity-title">${a.title}</h3>
+          </div>
+          <div class="activity-time">
+            <span class="activity-time">${a.end}</span>
+          </div>
+        </div>`;
+  });
+  viewActivityBody.innerHTML=newActivity;
+}
+
+function formatDateToLocalISO(date) {
+  const offset = date.getTimezoneOffset(); // Differenza fuso orario in minuti
+  date = new Date(date.getTime() - offset * 60000); // Corregge il fuso orario
+  return date.toISOString().slice(0, 16); // Formatta YYYY-MM-DDTHH:MM
+}
+
+function setEventData(){
+  // Ottieni data e ora attuali in fuso orario locale
+  const now = new Date();
+  now.setDate(activeDay);
+  const nowFormatted = formatDateToLocalISO(now);
+
+  // Aggiungi 30 minuti
+  const later = new Date(now.getTime() + 30 * 60000);
+  const laterFormatted = formatDateToLocalISO(later);
+
+  // Imposta i valori negli input
+  addEventFrom.value = nowFormatted;
+  addEventTo.value = laterFormatted;
+
 }

@@ -14,7 +14,7 @@ export const getEventsFromDB = async (username) => {
         await client.connect();
         const collection = database.collection(tableNames[0]);
 
-        const events = await collection.find({id_user:username}).toArray(); // Recupera tutti gli eventi
+        const events = await collection.find({id_user:username}).sort({ end : 1}).toArray(); // Recupera tutti gli eventi
 
         return events; // Restituisce i dati per ulteriori elaborazioni
     } catch (error) {
