@@ -1,4 +1,5 @@
-import { MongoClient, ObjectId } from "mongodb";
+import {MongoClient, ObjectId} from "mongodb";
+
 const uri = "mongodb://127.0.0.1:27017";
 const dbName = "SELFIE";
 const tableNames = ["EVENT", "NOTE", "USER"];
@@ -7,16 +8,15 @@ const tableNames = ["EVENT", "NOTE", "USER"];
  * Ottiene tutti gli eventi dal db
  * @returns {Promise<WithId<Document>[]>}
  */
-export const getEventsFromDB = async (username) => {
+export const getEventsFromDB = async (filter) => {
     const client = new MongoClient(uri);
     try {
         const database = client.db(dbName);
         await client.connect();
         const collection = database.collection(tableNames[0]);
 
-        const events = await collection.find({id_user:username}).sort({ end : 1}).toArray(); // Recupera tutti gli eventi
-
-        return events; // Restituisce i dati per ulteriori elaborazioni
+        // Recupera tutti gli eventi
+        return await collection.find(filter).toArray(); // Restituisce i dati per ulteriori elaborazioni
     } catch (error) {
         console.error("Errore durante il recupero degli eventi:", error);
     } finally {

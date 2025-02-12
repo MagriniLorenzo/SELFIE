@@ -1,10 +1,9 @@
 const PORT = 3000;
 const EVENT_FILE_PATH = "./events.json";
 const NOTES_FILE_PATH = "./notes.json";
-import {GoogleCalendar, ICalendar} from 'datebook';
+import {CalendarBase as ICS, GoogleCalendar, ICalendar} from 'datebook';
 import express from 'express';
 import session from 'express-session';
-import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import fs from 'fs';
 import cors from 'cors';
@@ -21,7 +20,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 
-app.use(cookieParser());
 // Middleware
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(bodyParser.json());
@@ -110,12 +108,60 @@ app.get("/home", isAuthenticated, (req, res) => {
 
 // Endpoint per ottenere eventi
 app.get("/events", isAuthenticated, (req, res) => {
-    getEventsFromDB(req.user.username)
+    const filter = {id_user: req.user.username};
+    //ottengo eventi e attività dell'utente
+    getEventsFromDB(filter)
         .then((events) => {
             // Se il file non esiste o è vuoto, restituisci un array vuoto
             events = events ? events : [];
 
             res.json(events);})
+        .catch((error) => {
+            return res.status(500).send("Errore nella lettura dei dati");
+        });
+});
+
+// Endpoint per ottenere eventi
+app.get("/events/iCalendar", isAuthenticated, (req, res) => {
+    const filter = {id_user: req.user.username, start: { $ne: "" }};
+    //ottengo tutti gli eventi dell'utente
+    getEventsFromDB(filter)
+        .then((events) => {
+            // Se il file non esiste o è vuoto, restituisci un array vuoto
+            if(events){
+                const icsEvents = new ICalendar({
+                    title: events[0].title,
+                    location: events[0].location,
+                    description: events[0].description,
+                    start: new Date(events[0].start),
+                    end: new Date(events[0].end),
+                    recurrence: {
+                        frequency: events[0].recurrence.frequency,
+                        interval: events[0].recurrence.interval
+                    }
+                });
+
+                for (let i= 1; i<events.length;i++){
+                    icsEvents.addEvent(new ICalendar({
+                        title: events[i].title,
+                        location: events[i].location,
+                        description: events[i].description,
+                        start: new Date(events[i].start),
+                        end: new Date(events[i].end),
+                        recurrence: {
+                            frequency: events[i].recurrence.frequency,
+                            interval: events[i].recurrence.interval
+                        }
+                    }));
+                }
+
+                res.setHeader("Content-Disposition", 'attachment; filename="your_events.ics"');
+                res.setHeader("Content-Type", "text/calendar");
+                res.send(icsEvents.render());
+            }else{
+                res.status(404).send("No such event");
+            }
+        })
         .catch((error) => {
             return res.status(500).send("Errore nella lettura dei dati");
         });

@@ -356,7 +356,7 @@ body {
 
 }
 
-.add-event ,.view-activity, .time-machine{
+.add-event ,.view-activity, .download-events{
   width: 40px;
   height: 40px;
   display: flex;
@@ -370,10 +370,10 @@ body {
   background-color: transparent;
   cursor: pointer;
 }
-.add-event:hover,.view-activity:hover, .time-machine:hover {
+.add-event:hover,.view-activity:hover, .download-events:hover {
   opacity: 1;
 }
-.add-event i, .view-activity i, .time-machine i{
+.add-event i, .view-activity i, .download-events i{
   pointer-events: none;
 }
 .events .no-event {
@@ -386,7 +386,7 @@ body {
   font-weight: 500;
   color: #878895;
 }
-.add-event-wrapper, .view-activity-wrapper, .time-machine-wrapper  {
+.add-event-wrapper, .view-activity-wrapper {
   position: absolute;
   bottom: 100px;
   left: 50%;
@@ -398,7 +398,7 @@ body {
   transform: translateX(-50%);
   transition: max-height 0.5s ease;
 }
-.add-event-wrapper.active, .view-activity-wrapper.active, .time-machine-wrapper.active {
+.add-event-wrapper.active, .view-activity-wrapper.active {
   max-height: 500px;
 }
 .add-event-header {
@@ -520,7 +520,7 @@ body {
   .events {
     padding-bottom: 340px;
   }
-  .add-event-wrapper, .view-activity-wrapper, .time-machine-wrapper {
+  .add-event-wrapper, .view-activity-wrapper {
     bottom: 100px;
   }
 }

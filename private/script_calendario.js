@@ -2,8 +2,8 @@
 var calendar, date, daysContainer, prev, next, todayBtn, gotoBtn, dateInput,
     eventDay, eventDate, eventsContainer, addEventBtn, addEventWrapper,
     addEventCloseBtn, addEventTitle, addEventFrom, addEventTo, addEventSubmit,
-    addEventDescription, eventType, divEventStart, viewActivityBtn, timeMachineBtn,
-    timeMachineWrapper, timeMachineCloseBtn,viewActivityWrapper, viewActivityCloseBtn,
+    addEventDescription, eventType, divEventStart, viewActivityBtn, downloadEventsBtn,
+    viewActivityWrapper, viewActivityCloseBtn,
     viewActivityBody, resetTodayBtn, logOutBtn;
 
 let today, activeDay, month, year;
@@ -26,13 +26,6 @@ let eventsArr = [];
 
 // Evento DOMContentLoaded
 document.addEventListener("DOMContentLoaded", async () => {
-  today= await getToday();
-  if (!today){
-    return;
-  }
-  month = today.getMonth();
-  year = today.getFullYear();
-
   // Inizializzazione delle variabili
   calendar = document.querySelector(".calendar");
   date = document.querySelector(".date");
@@ -56,16 +49,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   eventType= document.getElementsByName("radio");
   divEventStart= document.getElementById("eventStart");
   viewActivityBtn = document.querySelector(".view-activity");
-  timeMachineBtn = document.querySelector(".time-machine");
-  timeMachineWrapper = document.querySelector(".time-machine-wrapper");
-  timeMachineCloseBtn = document.querySelector(".time-machine-wrapper .add-event-header .close");
+  downloadEventsBtn = document.querySelector(".download-events");
   viewActivityWrapper = document.querySelector(".view-activity-wrapper");
   viewActivityCloseBtn = document.querySelector(".view-activity-wrapper .add-event-header .close");
   viewActivityBody = document.querySelector(".view-activity-body");
   logOutBtn = document.querySelector("#LogOut");
   resetTodayBtn = document.querySelector(".resetToday-btn");
 
-
+  today= await getToday();
+  if (!today){
+    return;
+  }
+  month = today.getMonth();
+  year = today.getFullYear();
 
   addEvent();
 
@@ -404,12 +400,8 @@ function addEvent() {
 
 
   //function to time machine
-  timeMachineBtn.addEventListener("click", () => {
-    timeMachineWrapper.classList.toggle("active");
-  });
-
-  timeMachineCloseBtn.addEventListener("click", () => {
-    timeMachineWrapper.classList.remove("active");
+  downloadEventsBtn.addEventListener("click", () => {
+    window.location.href = "http://localhost:3000/events/iCalendar";
   });
 
 
@@ -432,9 +424,6 @@ function addEvent() {
   document.addEventListener("click", (e) => {
     if (e.target !== addEventBtn && !addEventWrapper.contains(e.target)) {
       addEventWrapper.classList.remove("active");
-    }
-    if(e.target !== timeMachineBtn && !timeMachineWrapper.contains(e.target)){
-      timeMachineWrapper.classList.remove("active");
     }
     if(e.target !== viewActivityWrapper && e.target !== viewActivityBtn){
       viewActivityWrapper.classList.remove("active");
@@ -557,7 +546,21 @@ function addEvent() {
 
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) {
-      console.log("Pagina caricata dalla cache! Aggiorno i dati...");
+      setTimeout(async ()=>{
+        today= await getToday();
+        if (!today){
+          return;
+        }
+        month = today.getMonth();
+        year = today.getFullYear();
+
+        addEvent();
+
+        // Caricamento eventi e inizializzazione del calendario
+        fetchEvents().then(() => {
+          initCalendar();
+        });
+      }, 0);
     }
   });
 }

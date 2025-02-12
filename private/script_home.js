@@ -29,21 +29,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         disableOneColumnMode: true,
     });
 
-    today = await getToday();
-
-    if(!today){
-        return;
-    }
-
-    displayWeekDays();
-    displayCurrentWeek();
-
-    await loadEvents(today);
-    recuperaNote();
-
     await initHome();
-
-    await weather("Bologna");
 
     // Aggiungi evento per tutto il widget calendar-widget tranne che sui giorni
     document.querySelector(".calendar-widget").addEventListener("click", (e) => {
@@ -74,9 +60,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         await initHome();
     });
 
-    window.addEventListener("pageshow", (event) => {
+    window.addEventListener("pageshow",(event) => {
         if (event.persisted) {
-            console.log("Pagina caricata dalla cache! Aggiorno i dati...");
+            setTimeout(initHome, 0);
         }
     });
 });
@@ -314,6 +300,18 @@ async function setToday(date) {
 }
 
 async function initHome() {
+    today = await getToday();
+
+    if(!today){
+        return;
+    }
+
+    displayWeekDays();
+    displayCurrentWeek();
+
+    await loadEvents(today);
+    recuperaNote();
+
     if (weekDaysContainer) {
         weekDaysContainer.addEventListener("click", async (e) => {
             if (e.target.classList.contains("week-day")) {
@@ -339,4 +337,6 @@ async function initHome() {
         });
         await preSelectToday();
     }
+
+    await weather("Bologna");
 }
