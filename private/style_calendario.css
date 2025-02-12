@@ -437,6 +437,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  color: #a5a5a5;
 }
 .add-event-body .add-event-input input {
   width: 100%;
@@ -645,7 +646,7 @@ nav{
   transform: translateY(-50%);
 }
 
-.events .activity:hover, .view-activity-body .activity:hover, .view-activity-body .activity.expired:hover {
+.events .activity:hover, .view-activity-body:hover .activity:hover, .view-activity-body .activity.expired:hover {
   background: linear-gradient(90deg, #006f8c, transparent);
   color: #fff;
 }
@@ -665,8 +666,9 @@ textarea{
   color: #a5a5a5;
   border-radius: 4px;
   background-color: #fff;
-  font-size: 14px;
   resize: none;
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 .radio {
@@ -783,4 +785,18 @@ textarea{
 
 .view-activity-body .activity:hover::after {
   display: flex;
+}
+
+.add-event-input label{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  color: black;
+  width: 40%;
+  gap: 10px;
+}
+
+.add-event-interval {
+  display: flex;
+  max-width: 40%  ;
 }

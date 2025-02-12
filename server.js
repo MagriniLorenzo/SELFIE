@@ -1,7 +1,7 @@
 const PORT = 3000;
 const EVENT_FILE_PATH = "./events.json";
 const NOTES_FILE_PATH = "./notes.json";
-import {CalendarBase as ICS, GoogleCalendar, ICalendar} from 'datebook';
+import {ICalendar} from 'datebook';
 import express from 'express';
 import session from 'express-session';
 import bodyParser from 'body-parser';
@@ -46,15 +46,6 @@ app.use((req, res, next) => {
     }
     next();
 });
-
-// Middleware per impostare la data personalizzata nella sessione e nel cookie
-// app.use((req, res, next) => {
-//     if (!req.session.today) {
-//         req.session.today = new Date(); // Data di default
-//     }
-//     res.cookie("today", req.session.today.toISOString(), { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-//     next();
-// });
 
 // Inizializza Passport.js
 app.use(passport.initialize());
@@ -129,30 +120,42 @@ app.get("/events/iCalendar", isAuthenticated, (req, res) => {
         .then((events) => {
             // Se il file non esiste o è vuoto, restituisci un array vuoto
             if(events){
-                const icsEvents = new ICalendar({
+                let newEvent ={
                     title: events[0].title,
-                    location: events[0].location,
                     description: events[0].description,
                     start: new Date(events[0].start),
-                    end: new Date(events[0].end),
-                    recurrence: {
-                        frequency: events[0].recurrence.frequency,
-                        interval: events[0].recurrence.interval
+                    end: new Date(events[0].end)
+                };
+                if(events[0].eventLocation){
+                    newEvent.location = events[0].eventLocation;
+                }
+                if(events[0].eventFrequency && events[0].eventInterval){
+                    newEvent.recurrence = {
+                        frequency: events[0].eventFrequency,
+                        interval: events[0].eventInterval
                     }
-                });
+                }
+
+                const icsEvents = new ICalendar(newEvent);
 
                 for (let i= 1; i<events.length;i++){
-                    icsEvents.addEvent(new ICalendar({
+                    let newEvent ={
                         title: events[i].title,
-                        location: events[i].location,
                         description: events[i].description,
                         start: new Date(events[i].start),
-                        end: new Date(events[i].end),
-                        recurrence: {
-                            frequency: events[i].recurrence.frequency,
-                            interval: events[i].recurrence.interval
+                        end: new Date(events[i].end)
+                    };
+                    if(events[i].eventLocation){
+                        newEvent.location = events[i].eventLocation;
+                    }
+                    if(events[i].eventFrequency && events[i].eventInterval){
+                        newEvent.recurrence = {
+                            frequency: events[i].eventFrequency,
+                            interval: events[i].eventInterval
                         }
-                    }));
+                    }
+
+                    icsEvents.addEvent(new ICalendar(newEvent));
                 }
 
                 res.setHeader("Content-Disposition", 'attachment; filename="your_events.ics"');

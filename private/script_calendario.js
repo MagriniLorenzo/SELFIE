@@ -3,8 +3,8 @@ var calendar, date, daysContainer, prev, next, todayBtn, gotoBtn, dateInput,
     eventDay, eventDate, eventsContainer, addEventBtn, addEventWrapper,
     addEventCloseBtn, addEventTitle, addEventFrom, addEventTo, addEventSubmit,
     addEventDescription, eventType, divEventStart, viewActivityBtn, downloadEventsBtn,
-    viewActivityWrapper, viewActivityCloseBtn,
-    viewActivityBody, resetTodayBtn, logOutBtn;
+    divFrequency, divLocation, viewActivityWrapper, viewActivityCloseBtn,
+    addEventInterval, addEventFrequency, addEventLocation, viewActivityBody, resetTodayBtn, logOutBtn;
 
 let today, activeDay, month, year;
 
@@ -44,6 +44,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   addEventTitle = document.querySelector(".event-name");
   addEventFrom = document.querySelector(".event-time-from");
   addEventTo = document.querySelector(".event-time-to");
+  addEventLocation = document.querySelector(".add-event-location");
+  addEventFrequency = document.querySelector(".add-event-frequency");
+  addEventInterval = document.querySelector(".add-event-interval");
   addEventSubmit = document.querySelector(".add-event-btn");
   addEventDescription = document.querySelector(".event-description");
   eventType= document.getElementsByName("radio");
@@ -55,6 +58,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   viewActivityBody = document.querySelector(".view-activity-body");
   logOutBtn = document.querySelector("#LogOut");
   resetTodayBtn = document.querySelector(".resetToday-btn");
+  divFrequency = document.getElementById("frequency");
+  divLocation = document.getElementById("location");
 
   today= await getToday();
   if (!today){
@@ -420,7 +425,6 @@ function addEvent() {
     addEventWrapper.classList.remove("active");
   });
 
-  // ???
   document.addEventListener("click", (e) => {
     if (e.target !== addEventBtn && !addEventWrapper.contains(e.target)) {
       addEventWrapper.classList.remove("active");
@@ -441,45 +445,47 @@ function addEvent() {
     const eventDescription = addEventDescription.value;
     let eventTimeFrom = addEventFrom.value;
     const eventTimeTo = addEventTo.value;
+    const eventLocation = addEventLocation.value;
+    const eventFrequency = addEventFrequency.value;
+    let eventInterval = addEventInterval.value;
     const radio = document.querySelector('input[name="radio"]:checked');
+    let newEvent;
 
     if(radio.value==="event") {
-      if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "" || eventDescription === "") {
+      if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "" || eventDescription === "" ) {
         alert("Please fill all the fields");
         return;
+      }
+
+      newEvent = {
+        title: eventTitle,
+        description: eventDescription,
+        start: eventTimeFrom,
+        end: eventTimeTo
+      };
+
+      if(eventLocation){
+        newEvent.location = eventLocation;
+      }
+      if(eventFrequency && eventInterval){
+        newEvent.recurrence = {
+          frequency: eventFrequency,
+          interval: eventInterval
+        }
       }
     }else if(radio.value==="activity"){
       if (eventTitle === "" || eventTimeTo === "" || eventDescription === "") {
         alert("Please fill all the fields");
         return;
       }
-      eventTimeFrom="";
+      newEvent = {
+        title: eventTitle,
+        description: eventDescription,
+        start: "",
+        end: eventTimeTo
+      };
     }
 
-    const newEvent = {
-      title: eventTitle,
-      location: "The Bar, New York, NY",
-      description: eventDescription,
-      start: eventTimeFrom,
-      end: eventTimeTo,
-      attendees: [
-        {
-          "name": "John Doe",
-          "email": "john@doe.com",
-          "icsOptions": {
-            "rsvp": true
-          }
-        },
-        {
-          "name": "Jane Doe",
-          "email": "jane@doe.com"
-        }
-      ],
-      recurrence: {
-        "frequency": "WEEKLY",
-        "interval": 2
-      }
-    };
 
     try {
       // Invia l'evento al server
@@ -495,18 +501,21 @@ function addEvent() {
         throw new Error("Errore durante il salvataggio dell'evento");
       }
 
-      const data = await response.text(); // Leggi la risposta come testo
+      await response.text(); // Leggi la risposta come testo
 
       // Reset dei campi di input
       addEventTitle.value = "";
       addEventFrom.value = "";
       addEventTo.value = "";
       addEventDescription.value = "";
+      addEventInterval.value="";
+      addEventFrequency.value="";
+      addEventLocation.value="";
       addEventWrapper.classList.remove("active");
 
       // Aggiorna la UI
       await fetchEvents(); // Aspetta il completamento di fetchEvents
-      initCalendar(new Date(year,month,activeDay));
+      initCalendar(new Date(year, month, activeDay));
     } catch (error) {
       console.error(error);
       alert("Errore durante il salvataggio dell'evento");
@@ -530,11 +539,17 @@ function addEvent() {
       if (e.target.value === "event") {
         setEventData();
         divEventStart.style.display = "flex";
+        divFrequency.style.display = "flex";
+        divLocation.style.display = "flex";
+        addEventSubmit.innerText="Add Event";
       } else if(e.target.value === "activity"){
         //elimino data e ora se impostate
         addEventTo.value="";
         addEventFrom.value="";
         divEventStart.style.display = "none";
+        divFrequency.style.display = "none";
+        divLocation.style.display = "none";
+        addEventSubmit.innerText="Add Activity";
       }
     })
   });
@@ -732,7 +747,7 @@ function formatDateToLocalISO(date) {
 
 function setEventData(){
   // Ottieni data e ora attuali in fuso orario locale
-  let now = today;
+  let now = new Date(today);
   now.setDate(activeDay);
   const nowFormatted = formatDateToLocalISO(now);
 

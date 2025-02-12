@@ -87,6 +87,25 @@
             <div class="add-event-input">
               <input type="datetime-local" placeholder="dd/mm/yyyy" class="event-time-to" />
             </div>
+            <div id="location" class="add-event-input">
+              <input type="text" class="add-event-location" placeholder="Where does this event take place?">
+            </div>
+            <div id="frequency" class="add-event-input">
+              <label>
+                Frequency:
+                <select class="add-event-frequency">
+                  <option value="none"></option>
+                  <option value="DAILY">daily</option>
+                  <option value="WEEKLY">weekly</option>
+                  <option value="MONTHLY">monthly</option>
+                  <option value="YEARLY">yearly</option>
+                </select>
+              </label>
+              <label>
+                Interval:
+                <input type="number" min="1" step="1" size="1" class="add-event-interval">
+              </label>
+            </div>
           </div>
           <div class="add-event-footer">
             <button class="add-event-btn">Add Event</button>
