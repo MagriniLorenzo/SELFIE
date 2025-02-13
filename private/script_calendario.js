@@ -269,19 +269,16 @@ function updateEvents(date) {
     let dayEnd = normalizeDate(new Date(event.end));
     if (dayStart <= data  && data <= dayEnd) {
       //formatto l'ora
+      let formattedTimeRange;
       let formattedStart,formattedEnd;
       if(dayStart < data && data < dayEnd) {
-        formattedStart ="all";
-        formattedEnd="day";
-      // }else if(dayStart===dayEnd){
-      //    formattedStart = (new Date(event.start)).toLocaleTimeString("it-IT", formatOptions);
-      //    formattedEnd = (new Date(event.end)).toLocaleTimeString("it-IT", formatOptions);
+        formattedTimeRange ="all day";
       }else{
          formattedStart = date===dayStart.getDate()?(new Date(event.start)).toLocaleTimeString("it-IT", formatOptions):"";
          formattedEnd = date===dayEnd.getDate()?(new Date(event.end)).toLocaleTimeString("it-IT", formatOptions):"";
+         formattedTimeRange = `${formattedStart} - ${formattedEnd}`;
       }
 
-      let formattedTimeRange = `${formattedStart} - ${formattedEnd}`;
 
 
       // Aggiungi l'evento alla variabile events come HTML
@@ -297,8 +294,6 @@ function updateEvents(date) {
         </div>`;
     }else if(event.start===""&&data.toLocaleDateString("it-IT")===dayEnd.toLocaleDateString("it-IT")){
       let formattedEnd = (new Date(event.end)).toLocaleTimeString("it-IT", formatOptions);
-      // let tempToday = new Date();
-      // tempToday.setDate(today.getDate());
       let type= (today)>(new Date(event.end))?"activity expired":"activity";
       // Aggiungi l'evento alla variabile events come HTML
       events += `
@@ -644,9 +639,13 @@ function deleteEventOnDB(eventToDelete, type){
         if (!response.ok) {
           throw new Error("Errore durante l'eliminazione dell'evento");
         }
-        let eventIndex = eventsArr.indexOf(eventToDelete);
-        // Rimuovi l'evento dall'array locale
-        eventsArr.splice(eventIndex, 1);
+
+        for (let i = eventsArr.length - 1; i >= 0; i--) {
+          if (eventsArr[i]._id === eventToDelete._id) {
+            eventsArr.splice(i, 1);
+          }
+        }
+
 
         //aggiorna l'interfaccia
         initCalendar(new Date(year,month,activeDay));
@@ -724,7 +723,8 @@ function loadActivity(){
   activity.forEach((a)=>{
     // const tempToday = new Date();
     // tempToday.setDate(today.getDate());
-    let type= (today)>(new Date(a.end))?"activity expired":"activity";
+    const timeEnd = new Date(a.end);
+    let type= (today)>(timeEnd)?"activity expired":"activity";
     newActivity +=`
         <div class="${type}">
           <div class="title">
@@ -732,7 +732,7 @@ function loadActivity(){
             <h3 class="activity-title">${a.title}</h3>
           </div>
           <div class="activity-time">
-            <span class="activity-time">${a.end}</span>
+            <span class="activity-time">completare entro - ${timeEnd.toLocaleTimeString("it-IT",{hour: "2-digit", minute: "2-digit"})}</span>
           </div>
         </div>`;
   });

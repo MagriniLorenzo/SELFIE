@@ -1,3 +1,5 @@
+import RRule from "rrule";
+import RRuleSet from "rrule";
 const PORT = 3000;
 const EVENT_FILE_PATH = "./events.json";
 const NOTES_FILE_PATH = "./notes.json";
@@ -105,7 +107,7 @@ app.get("/events", isAuthenticated, (req, res) => {
         .then((events) => {
             // Se il file non esiste o è vuoto, restituisci un array vuoto
             events = events ? events : [];
-
+            events = expandRecurringEvents(events);
             res.json(events);})
         .catch((error) => {
             return res.status(500).send("Errore nella lettura dei dati");
@@ -373,4 +375,45 @@ function isNonEmptyJSON(variable) {
         variable !== null &&
         !Array.isArray(variable) &&
         Object.keys(variable).length > 0;
+}
+
+function expandRecurringEvents(events) {
+    const expandedEvents = [];
+
+    events.forEach((event) => {
+        if (event.recurrence) {
+            const dateStart = new Date(event.start);
+            const freqMap = {
+                DAILY: RRule.RRule.DAILY,
+                WEEKLY: RRule.RRule.WEEKLY,
+                MONTHLY: RRule.RRule.MONTHLY,
+                YEARLY: RRule.RRule.YEARLY
+            };
+
+            const rule = new RRule.RRule({
+                freq: freqMap[event.recurrence.frequency],
+                count: event.recurrence.interval,
+                dtstart: RRule.datetime(dateStart.getFullYear(),dateStart.getMonth()+1,dateStart.getDate(),dateStart.getHours(),dateStart.getMinutes()),
+            });
+
+            const occurrences = rule.all();
+
+            occurrences.forEach((date) => {
+                if (date.getTime() !== new Date(event.start).getTime()) {
+                    const newEvent = {
+                        ...event,
+                        start: date,
+                        end: new Date(date.getTime() + (new Date(event.end) - new Date(event.start))),
+                        originalStart: event.start,
+                    };
+                    delete newEvent.recurrence;
+                    expandedEvents.push(newEvent);
+                }
+            });
+        }else{
+            expandedEvents.push(event);
+        }
+    });
+
+    return expandedEvents;
 }

@@ -111,14 +111,19 @@ async function loadEvents(data) {
         }
 
         const dati = await response.json();
-        const eventiDaMostrare = dati.filter(event =>
-            normalizeDate(data) >= normalizeDate(new Date(event.start)) &&
-            normalizeDate(data) <= normalizeDate(new Date(event.end))
+        const eventiDaMostrare = dati.filter(event =>{
+                if(event.start===""){
+                    return normalizeDate(data).toLocaleDateString("it-IT") === normalizeDate(new Date(event.end)).toLocaleDateString("it-IT");
+                }else{
+                    return normalizeDate(data) >= normalizeDate(new Date(event.start)) &&
+                        normalizeDate(data) <= normalizeDate(new Date(event.end));
+                }
+            }
         );
 
         if (listaEventi) {
             listaEventi.innerHTML = eventiDaMostrare.length
-                ? eventiDaMostrare.map(formatEvent).join('')
+                ? eventiDaMostrare.map((event)=>formatEvent(event,data)).join('')
                 : '<li>Nessun evento per oggi!</li>';
         }
     } catch (error) {
@@ -172,22 +177,28 @@ async function logOut(){
 
 }
 
-function formatEvent(event){
-    let dayStart = new Date(event.start);
-    let dayEnd = new Date(event.end);
-
+function formatEvent(event, data){
     const formatOptions = { hour: "2-digit", minute: "2-digit", hour12: true };
+    let formattedTimeRange;
+    if(event.start===""){
+        let dayEnd = new Date(event.end);
+        const formattedEnd = dayEnd.toLocaleTimeString("it-IT", formatOptions);
 
-    const formattedStart = dayStart.toLocaleTimeString("en-US", formatOptions);
-    const formattedEnd = dayEnd.toLocaleTimeString("en-US", formatOptions);
+        formattedTimeRange = `entro: ${formattedEnd}`;
+    }else {
+        let formattedStart,formattedEnd;
+        let dayStart = new Date(event.start);
+        let dayEnd = new Date(event.end);
 
-    let formattedTimeRange = `${formattedStart} - ${formattedEnd}`;
-
-    formattedTimeRange = dayStart.getDate()===dayEnd.getDate()&&dayStart.getMonth()===dayEnd.getMonth()&&dayStart.getFullYear()===dayEnd.getFullYear()?
-            formattedTimeRange:
-            "all day";
-
-    return`<li>${formattedTimeRange} - ${event.title}</li>`
+        if(normalizeDate(dayStart) < normalizeDate(data) && normalizeDate(data) < normalizeDate(dayEnd)) {
+            formattedTimeRange= "all day";
+        }else{
+            formattedStart = data.getDate()===dayStart.getDate()?(new Date(event.start)).toLocaleTimeString("it-IT", formatOptions):"";
+            formattedEnd = data.getDate()===dayEnd.getDate()?(new Date(event.end)).toLocaleTimeString("it-IT", formatOptions):"";
+            formattedTimeRange = `${formattedStart} - ${formattedEnd}`;
+        }
+    }
+    return`<li>${event.title}   ${formattedTimeRange}</li>`
 }
 
 
