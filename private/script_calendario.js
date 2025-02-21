@@ -3,8 +3,9 @@ var calendar, date, daysContainer, prev, next, todayBtn, gotoBtn, dateInput,
     eventDay, eventDate, eventsContainer, addEventBtn, addEventWrapper,
     addEventCloseBtn, addEventTitle, addEventFrom, addEventTo, addEventSubmit,
     addEventDescription, eventType, divEventStart, viewActivityBtn, downloadEventsBtn,
-    divFrequency, divLocation, viewActivityWrapper, viewActivityCloseBtn,
-    addEventInterval, addEventFrequency, addEventLocation, viewActivityBody, resetTodayBtn, logOutBtn;
+    divFrequency, divLocation, viewActivityWrapper, viewActivityCloseBtn,doFullEventBtn, closeFullEventBtn,
+    addEventInterval, addEventFrequency, addEventLocation, viewActivityBody, resetTodayBtn, logOutBtn,
+    fullEventWrapper, fullEventTitle, fullEventTime, fullEventDescription, fullEventDates, deleteFullEventBtn;
 
 let today, activeDay, month, year;
 
@@ -60,6 +61,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   resetTodayBtn = document.querySelector(".resetToday-btn");
   divFrequency = document.getElementById("frequency");
   divLocation = document.getElementById("location");
+  fullEventWrapper = document.querySelector(".full-event-wrapper");
+  fullEventTitle = document.querySelector(".full-event-title");
+  fullEventTime = document.querySelector(".full-event-time");
+  fullEventDescription = document.querySelector(".full-event-description");
+  fullEventDates = document.querySelector(".full-event-dates");
+  doFullEventBtn = document.querySelector(".do-event-btn");
+  deleteFullEventBtn = document.querySelector(".delete-event-btn");
+  closeFullEventBtn = document.getElementById("closeFullEvent");
+
 
   today= await getToday();
   if (!today){
@@ -196,7 +206,7 @@ function addListner() {
       //if clicked prev-date or next-date switch to that month
       if (e.target.classList.contains("prev-date")) {
         prevMonth();
-        //add active to clicked day afte month is change
+        //add active to clicked day after month is change
         setTimeout(() => {
           //add active where no prev-date or next-date
           const days = document.querySelectorAll(".day");
@@ -211,7 +221,7 @@ function addListner() {
         }, 100);
       } else if (e.target.classList.contains("next-date")) {
         nextMonth();
-        //add active to clicked day afte month is changed
+        //add active to clicked day after month is changed
         setTimeout(() => {
           const days = document.querySelectorAll(".day");
           days.forEach((day) => {
@@ -424,8 +434,11 @@ function addEvent() {
     if (e.target !== addEventBtn && !addEventWrapper.contains(e.target)) {
       addEventWrapper.classList.remove("active");
     }
-    if(e.target !== viewActivityWrapper && e.target !== viewActivityBtn){
+    if(!viewActivityWrapper.contains(e.target) && e.target !== viewActivityBtn && !fullEventWrapper.contains(e.target) ){
       viewActivityWrapper.classList.remove("active");
+    }
+    if(!viewActivityWrapper.contains(e.target) && e.target !== closeFullEventBtn && !fullEventWrapper.contains(e.target) ){
+      fullEventWrapper.classList.remove("active");
     }
   });
 
@@ -517,15 +530,30 @@ function addEvent() {
     }
   });
 
-//function to delete event when clicked on event
+//function to view event/activity when clicked on it
   eventsContainer.addEventListener("click", (e) => {
-    let type = "event";
-    if (e.target.closest(".event")) {
-      removeEvent(type,e);
-    }else if(e.target.closest(".activity")){
-      type="activity";
-      removeEvent(type,e);
-    }
+      // Trova gli eventi del giorno selezionato
+      const selectedDayEvents = eventsArr.filter(
+          (event) =>{
+            return isBetween(event)||isActivityInActiveDay(event);
+          }
+      );
+
+      if(selectedDayEvents.length) {
+        let nodes = Array.from(e.target.parentNode.children);
+        // Trova l'indice dell'elemento cliccato tra i figli
+        const indexOfClicked = nodes.indexOf(e.target);
+
+        if (indexOfClicked !== -1) {
+          const eventToDelete = selectedDayEvents[indexOfClicked];
+          if (eventToDelete) {
+            openFullEventView(eventToDelete, removeEvent);
+            fullEventWrapper.classList.add("active");
+          } else {
+            alert(`evento o  attivita non trovata.`);
+          }
+        }
+      }
   });
 
   //function to visualize the field for the input: event/actiivity
@@ -549,9 +577,19 @@ function addEvent() {
     })
   });
 
-  //function to delete activity when clicked on activity in the activity list
+  //function to view activity when clicked on activity in the activity list
   viewActivityBody.addEventListener("click", (e) => {
-      removeActivity(e);
+    // Trova tutte le attività
+    let activity = eventsArr.filter((a)=>a.start==="");
+    activity.sort((a, b) => a.end.localeCompare(b.end));
+
+    let nodes = Array.from(e.target.parentNode.children);
+    // Trova l'indice dell'elemento cliccato tra i figli
+    const indexOfClicked = nodes.indexOf(e.target);
+    let event = activity[indexOfClicked];
+
+    openFullEventView(event, removeActivity);
+    fullEventWrapper.classList.add("active");
   });
 
   window.addEventListener("pageshow", (event) => {
@@ -575,55 +613,24 @@ function addEvent() {
   });
 }
 
-function removeEvent(type, e){
-  if (confirm(`Are you sure you want to delete this ${type}?`)) {
-    const eventElement = e.target.closest(`.${type}`)
-    const eventTitle = eventElement.querySelector(`.${type}-title`).innerHTML;
-    let data = new Date(year,month,activeDay);
-
-    // Trova gli eventi del giorno selezionato
-    const selectedDayEvents = eventsArr.filter(
-        (event) =>{
-          return isBetween(event)||isActivityInActiveDay(event);
-        }
-    );
-
-    let nodes = Array.from(e.target.parentNode.children);
-    // Trova l'indice dell'elemento cliccato tra i figli
-    const indexOfClicked = nodes.indexOf(e.target);
-
-    if (indexOfClicked !== -1) {
-      const eventToDelete = selectedDayEvents[indexOfClicked];
-
-      // Rimuovi l'evento dal db
-      deleteEventOnDB(eventToDelete, type);
-    } else {
-      alert(`${type} non trovato.`);
-    }
-  }
+function removeEvent(e){
+    let type = e.start === ""?"activity":"event";
+    // Rimuovi l'evento dal db
+    deleteEventOnDB(e, type);
+    fullEventWrapper.classList.remove("active");
 }
 
-function removeActivity(e){
-  if (confirm("Are you sure you want to delete this activity?")) {
-    const eventElement = e.target.closest(".activity")
-
-    // Trova tutte le attività
-    let activity = eventsArr.filter((a)=>a.start==="");
-    activity.sort((a, b) => a.end.localeCompare(b.end));
-
-    let nodes = Array.from(e.target.parentNode.children);
-    // Trova l'indice dell'elemento cliccato tra i figli
-    const indexOfClicked = nodes.indexOf(e.target);
-
-    if (indexOfClicked !== -1) {
-      const activityToDelete = activity[indexOfClicked];
-
+function removeActivity(activityToDelete){
+    if (activityToDelete) {
       // Rimuovo l'attività dal db
       deleteEventOnDB(activityToDelete, "activity");
+      let index = eventsArr.indexOf(activityToDelete)
+      eventsArr.splice(index, 1);
+      loadActivity();
+      fullEventWrapper.classList.remove("active");
     } else {
       alert("attività non trovata.");
     }
-  }
 }
 
 function deleteEventOnDB(eventToDelete, type){
@@ -736,6 +743,11 @@ function loadActivity(){
           </div>
         </div>`;
   });
+
+  if(!activity.length){
+    newActivity +=`<h3 class="no-activity">No Activities</h3>`;
+  }
+  viewActivityBody.innerHTML="";
   viewActivityBody.innerHTML=newActivity;
 }
 
@@ -770,4 +782,35 @@ async function getToday() {
     console.error("Errore:", error);
     return null;
   }
+}
+
+function  openFullEventView(event, menageEvent){
+  // Imposta i contenuti dell'evento completo
+  fullEventTitle.textContent = event.title;
+  fullEventDescription.textContent = event.description;
+  let timeEnd = new Date(event.end);
+  fullEventTime.textContent = `completare entro - ${timeEnd.toLocaleTimeString("it-IT",{hour: "2-digit", minute: "2-digit"})}`;
+  doFullEventBtn.setAttribute("data-id", event._id);
+  deleteFullEventBtn.setAttribute("data-id", event._id);
+
+  // Mostra la vista completa della nota
+  fullEventWrapper.classList.remove("hidden");
+
+  // Eventi per la chiusura della vista completa
+  closeFullEventBtn.addEventListener("click", () => {
+    fullEventWrapper.classList.remove("active");
+  });
+
+  //riassegno gli elementi del dom per eliminare gli eventi
+  let newElementDelete = deleteFullEventBtn.cloneNode(true);
+  let newElementDo = doFullEventBtn.cloneNode(true);
+  deleteFullEventBtn.parentNode.replaceChild(newElementDelete, deleteFullEventBtn);
+  doFullEventBtn.parentNode.replaceChild(newElementDo, doFullEventBtn);
+
+  deleteFullEventBtn = newElementDelete;
+  doFullEventBtn = newElementDo;
+
+  //assegno i nuovi eventi
+  deleteFullEventBtn.addEventListener("click", () => menageEvent(event));
+  doFullEventBtn.addEventListener("click", () => menageEvent(event));
 }

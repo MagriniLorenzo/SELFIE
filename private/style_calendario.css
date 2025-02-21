@@ -524,6 +524,9 @@ body {
   .add-event-wrapper, .view-activity-wrapper {
     bottom: 100px;
   }
+  .full-event{
+    max-width: 600px;
+  }
 }
 @media screen and (max-width: 500px) {
   .calendar .month {
@@ -772,7 +775,7 @@ textarea{
   margin-left: 20px;
 }
 
-.view-activity-body .activity:hover i {
+.view-activity-body .activity:hover i, #closeFullEvent:hover i {
   color: #fff;
 }
 
@@ -799,4 +802,101 @@ textarea{
 .add-event-interval {
   display: flex;
   max-width: 40%  ;
+}
+
+.hidden {
+  display: none;
+}
+
+.full-event-wrapper {
+  display: none;
+  position: fixed; /* Per centrarlo rispetto alla finestra del browser */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgb(153, 153, 153); /* Sfondo leggermente trasparente */
+  padding: 20px;
+  max-width: 90vw; /* Limita la larghezza al 90% della finestra */
+  max-height: 90vh; /* Limita l'altezza al 90% della finestra */
+  border-radius: 15px; /* Bordi arrotondati */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Ombra elegante */
+  overflow: auto; /* Aggiunge lo scroll se il contenuto è troppo grande */
+  z-index: 1000; /* Assicura che sia sopra gli altri elementi */
+  color: black;
+}
+
+.full-event-wrapper.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centra verticalmente */
+  align-items: center; /* Centra orizzontalmente */
+}
+
+.full-event {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  justify-content: center;
+  align-items: center;
+  max-width: 300px;
+}
+
+.full-event h2,
+.full-event p {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-width: 100%; /* Ensures it doesn't overflow */
+}
+
+.full-event .full-event-time{
+  border-top: 2px solid var(--primary-clr);
+  border-bottom: 2px solid var(--primary-clr);
+  margin: 10px;
+  padding: 5px;
+}
+
+.close-btn button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: #333;
+}
+
+.footer-event {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+button.do-event-btn, button.delete-event-btn {
+  background-color: var(--primary-clr);
+  color: #333;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 10px;
+  font-weight: bold;
+}
+
+button.do-event-btn:hover, button.delete-event-btn:hover {
+  background-color: #6b4e8c;
+} 
+
+.no-activity{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  font-size: 1.5rem;
+  font-weight: bolder;
+  color: #878895;
+  margin: 10px 0 10px 0;
 }
