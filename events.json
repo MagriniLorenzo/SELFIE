@@ -1,196 +1,53 @@
 [{
   "_id": {
-    "$oid": "67a627eacccd27031ed53860"
+    "$oid": "67add8e498b68dab590b3350"
   },
-  "title": "Happy Hour",
-  "location": "The Bar, New York, NY",
-  "description": "Let's blow off some steam with a tall cold one!",
-  "start": "2025-02-08T19:00:00",
-  "end": "2025-02-08T23:30:00",
-  "attendees": [
-    {
-      "name": "John Doe",
-      "email": "john@doe.com",
-      "icsOptions": {
-        "rsvp": true
-      }
-    },
-    {
-      "name": "Jane Doe",
-      "email": "jane@doe.com"
-    }
-  ],
+  "title": "evento1",
+  "description": "evento1",
+  "start": "2025-02-12T12:31",
+  "end": "2025-02-12T13:01",
+  "id_user": "admin"
+},
+{
+  "_id": {
+    "$oid": "67add8ff98b68dab590b3351"
+  },
+  "title": "evento2",
+  "description": "evento2",
+  "start": "2025-02-13T12:31",
+  "end": "2025-02-13T13:01",
+  "location": "casa mia",
   "recurrence": {
     "frequency": "WEEKLY",
-    "interval": 2
+    "interval": "1"
   },
   "id_user": "admin"
 },
 {
   "_id": {
-    "$oid": "67a627eacccd27031ed53861"
+    "$oid": "67add91d98b68dab590b3352"
   },
-  "title": "Happy Hour",
-  "location": "The Bar, New York, NY",
-  "description": "Let's blow off some steam with a tall cold one!",
-  "start": "2025-02-08T15:00:00",
-  "end": "2025-02-08T19:30:00",
-  "attendees": [
-    {
-      "name": "John Doe",
-      "email": "john@doe.com",
-      "icsOptions": {
-        "rsvp": true
-      }
-    },
-    {
-      "name": "Jane Doe",
-      "email": "jane@doe.com"
-    }
-  ],
+  "title": "evento3",
+  "description": "evento3",
+  "start": "2025-02-14T12:31",
+  "end": "2025-02-14T13:01",
   "recurrence": {
-    "frequency": "WEEKLY",
-    "interval": 2
+    "frequency": "MONTHLY",
+    "interval": "2"
   },
   "id_user": "admin"
 },
 {
   "_id": {
-    "$oid": "67a627eacccd27031ed53862"
+    "$oid": "67add96898b68dab590b3353"
   },
-  "title": "Happy Hour",
-  "location": "The Bar, New York, NY",
-  "description": "Let's blow off some steam with a tall cold one!",
-  "start": "2025-02-07T09:00:00",
-  "end": "2025-02-09T12:30:00",
-  "attendees": [
-    {
-      "name": "John Doe",
-      "email": "john@doe.com",
-      "icsOptions": {
-        "rsvp": true
-      }
-    },
-    {
-      "name": "Jane Doe",
-      "email": "jane@doe.com"
-    }
-  ],
+  "title": "evento4",
+  "description": "evento4",
+  "start": "2025-02-15T12:31",
+  "end": "2025-02-15T13:01",
   "recurrence": {
     "frequency": "WEEKLY",
-    "interval": 2
-  },
-  "id_user": "admin"
-},
-{
-  "_id": {
-    "$oid": "67a627eacccd27031ed53863"
-  },
-  "title": "Happy Hour",
-  "location": "The Bar, New York, NY",
-  "description": "Let's blow off some steam with a tall cold one!",
-  "start": "",
-  "end": "2025-02-20T12:30:00",
-  "attendees": [
-    {
-      "name": "John Doe",
-      "email": "john@doe.com",
-      "icsOptions": {
-        "rsvp": true
-      }
-    },
-    {
-      "name": "Jane Doe",
-      "email": "jane@doe.com"
-    }
-  ],
-  "recurrence": {
-    "frequency": "WEEKLY",
-    "interval": 2
-  },
-  "id_user": "admin"
-},
-{
-  "_id": {
-    "$oid": "67a64a50cccd27031ed53864"
-  },
-  "title": "Not Happy Hour",
-  "location": "The Bar, New York, NY",
-  "description": "Let's blow off some steam with a tall cold one!",
-  "start": "",
-  "end": "2025-02-05T12:30:00",
-  "attendees": [
-    {
-      "name": "John Doe",
-      "email": "john@doe.com",
-      "icsOptions": {
-        "rsvp": true
-      }
-    },
-    {
-      "name": "Jane Doe",
-      "email": "jane@doe.com"
-    }
-  ],
-  "recurrence": {
-    "frequency": "WEEKLY",
-    "interval": 2
-  },
-  "id_user": "admin"
-},
-{
-  "_id": {
-    "$oid": "67a8cf61ed87892fab4edffd"
-  },
-  "title": "Happy Hour",
-  "location": "The Bar, New York, NY",
-  "description": "Let's blow off some steam with a tall cold one!",
-  "start": "2025-02-05T19:00:00",
-  "end": "2025-02-05T23:30:00",
-  "attendees": [
-    {
-      "name": "John Doe",
-      "email": "john@doe.com",
-      "icsOptions": {
-        "rsvp": true
-      }
-    },
-    {
-      "name": "Jane Doe",
-      "email": "jane@doe.com"
-    }
-  ],
-  "recurrence": {
-    "frequency": "WEEKLY",
-    "interval": 2
-  },
-  "id_user": "admin"
-},
-{
-  "_id": {
-    "$oid": "67ab2736e11db64681545d1d"
-  },
-  "title": "activity 1",
-  "location": "The Bar, New York, NY",
-  "description": "Let's blow off some steam with a tall cold one!",
-  "start": "",
-  "end": "2025-02-05T23:30:00",
-  "attendees": [
-    {
-      "name": "John Doe",
-      "email": "john@doe.com",
-      "icsOptions": {
-        "rsvp": true
-      }
-    },
-    {
-      "name": "Jane Doe",
-      "email": "jane@doe.com"
-    }
-  ],
-  "recurrence": {
-    "frequency": "WEEKLY",
-    "interval": 2
+    "interval": "2"
   },
   "id_user": "admin"
 }]
