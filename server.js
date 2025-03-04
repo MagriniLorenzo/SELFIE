@@ -110,7 +110,7 @@ app.get("/events", isAuthenticated, (req, res) => {
             events = expandRecurringEvents(events);
             res.json(events);})
         .catch((error) => {
-            return res.status(500).send("Errore nella lettura dei dati");
+            res.status(500).send("Errore nella lettura dei dati");
         });
 });
 
@@ -168,7 +168,7 @@ app.get("/events/iCalendar", isAuthenticated, (req, res) => {
             }
         })
         .catch((error) => {
-            return res.status(500).send("Errore nella lettura dei dati");
+            res.status(500).send("Errore nella lettura dei dati");
         });
 });
 
@@ -184,10 +184,10 @@ app.post("/events", isAuthenticated, (req, res) => {
 
     addEventOnDB(newEvent)
         .then((events) => {
-            return res.status(200).send(events);
+            res.status(200).send(events);
         })
         .catch((error) => {
-            return res.status(500).send(`Errore nella scrittura dell'evento ${error}`);
+            res.status(500).send(`Errore nella scrittura dell'evento ${error}`);
         });
 });
 
@@ -202,13 +202,13 @@ app.delete("/events", isAuthenticated, async (req, res) => {
     await deleteEventOnDB(_id,req.user.username)
         .then((events) => {
             if(events===1){
-                return res.status(200).json({ message: "Evento eliminato con successo" });
+                res.status(200).json({ message: "Evento eliminato con successo" });
             }else {
-                return res.status(400).send(`l'evento ${_id} non esiste`);
+                res.status(400).send(`l'evento ${_id} non esiste`);
             }
         })
         .catch((error) => {
-            return res.status(500).send(`Errore nell'eliminazione dell'evento ${error}`);
+            res.status(500).send(`Errore nell'eliminazione dell'evento ${error}`);
         });
 });
 
@@ -221,7 +221,7 @@ app.get("/notes", isAuthenticated, async (req, res) => {
 
             res.json(notes);})
         .catch((error) => {
-            return res.status(500).send("Errore nella lettura dei dati");
+            res.status(500).send("Errore nella lettura dei dati");
         });
 });
 
@@ -232,15 +232,15 @@ app.post("/notes", isAuthenticated, async (req, res) => {
     newNote.id_user=req.user.username;
 
     if (!newNote.title || !newNote.content || !newNote.categories) {
-        return res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
+        res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
     }
 
     await addNoteOnDB(newNote)
         .then((note) => {
-            return res.status(200).send(note);
+            res.status(200).send(note);
         })
         .catch((error) => {
-            return res.status(500).send(`Errore nella scrittura della nota ${error}`);
+            res.status(500).send(`Errore nella scrittura della nota ${error}`);
         });
 });
 
@@ -251,15 +251,15 @@ app.put("/notes/:id", isAuthenticated, async (req, res) => {
     updatedNote.id_user=req.user.username;
 
     if (!updatedNote.title || !updatedNote.content || !updatedNote.categories) {
-        return res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
+        res.status(400).send("Il formato dei dati deve contenere 'title', 'content' e 'categories'.");
     }
 
     await updateNoteOnDB(id, updatedNote)
         .then((note) => {
-            return res.status(200).send(note);
+            res.status(200).send(note);
         })
         .catch((error) => {
-            return res.status(500).send(`Errore nella scrittura della nota ${error}`);
+            res.status(500).send(`Errore nella scrittura della nota ${error}`);
         });
 });
 
@@ -270,13 +270,13 @@ app.delete("/notes/:id", isAuthenticated, async (req, res) => {
     await deleteNoteOnDB(id,req.user.username)
         .then((events) => {
             if(events===1){
-                return res.status(200).json({ message: "Nota eliminata con successo" });
+                res.status(200).json({ message: "Nota eliminata con successo" });
             }else {
-                return res.status(400).send(`la nota ${id} non esiste`);
+                res.status(400).send(`la nota ${id} non esiste`);
             }
         })
         .catch((error) => {
-            return res.status(500).send(`Errore nell'eliminazione della nota ${error}`);
+            res.status(500).send(`Errore nell'eliminazione della nota ${error}`);
         });
 });
 
@@ -303,7 +303,7 @@ app.post("/register", async (req, res) => {
     const userData = req.body;
 
     if (!isNonEmptyJSON(userData)) {
-        return res.status(400).send("Il formato dei dati deve essere un Json non vuoto.");
+        res.status(400).send("Il formato dei dati deve essere un Json non vuoto.");
     }
 
     // Hasheriamo la password
@@ -312,13 +312,13 @@ app.post("/register", async (req, res) => {
     addAccountOnDB(userData.username,hashedPassword)
         .then((events) => {
             if(events)
-                return res.status(200).send("Account registrato");
+                res.status(200).send("Account registrato");
             else {
-                return res.status(400).send("Errore, il nome utente che hai inserito esiste già");
+                res.status(400).send("Errore, il nome utente che hai inserito esiste già");
             }
         })
         .catch((error) => {
-            return res.status(500).send(`Errore nella creazione dell'account ${error}`);
+            res.status(500).send(`Errore nella creazione dell'account ${error}`);
         });
 });
 
@@ -330,7 +330,9 @@ app.post('/login', passport.authenticate('local'), (req, res) => {
 // Rotta di logout
 app.get('/logout', (req, res) => {
     req.logout(err => {
-        if (err) return res.status(500).json({ message: 'Errore nel logout' });
+        if (err){
+            res.status(500).json({ message: 'Errore nel logout' });
+        }
         res.json({ message: 'Logout effettuato' });
     });
 });
@@ -350,7 +352,7 @@ app.get("/get-today",isAuthenticated, (req, res) => {
 app.post("/setToday",isAuthenticated, (req, res) => {
     const { newDate } = req.body;
     if (!newDate || isNaN(Date.parse(newDate))) {
-        return res.status(400).json({ error: "Data non valida" });
+        res.status(400).json({ error: "Data non valida" });
     }
     req.session.today = new Date(newDate);
     res.json({ message: `Data impostata a ${req.session.today.toISOString()}` });

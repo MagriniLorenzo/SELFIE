@@ -437,7 +437,7 @@ function addEvent() {
     if(!viewActivityWrapper.contains(e.target) && e.target !== viewActivityBtn && !fullEventWrapper.contains(e.target) ){
       viewActivityWrapper.classList.remove("active");
     }
-    if(!viewActivityWrapper.contains(e.target) && e.target !== closeFullEventBtn && !fullEventWrapper.contains(e.target) ){
+    if(!eventsContainer.contains(e.target) && e.target !== closeFullEventBtn && !fullEventWrapper.contains(e.target) ){
       fullEventWrapper.classList.remove("active");
     }
   });
@@ -549,9 +549,10 @@ function addEvent() {
           if (eventToDelete) {
             openFullEventView(eventToDelete, removeEvent);
             fullEventWrapper.classList.add("active");
-          } else {
-            alert(`evento o  attivita non trovata.`);
           }
+          /*else {
+            alert(`evento o  attivita non trovata.`);
+          }*/
         }
       }
   });
