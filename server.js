@@ -1,6 +1,6 @@
 import RRule from "rrule";
 import RRuleSet from "rrule";
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const EVENT_FILE_PATH = "./events.json";
 const NOTES_FILE_PATH = "./notes.json";
 import {ICalendar} from 'datebook';
@@ -16,7 +16,7 @@ import path from 'path';
 import { fileURLToPath } from "url";
 import { getEventsFromDB, addEventOnDB, deleteEventOnDB,
          addNoteOnDB, updateNoteOnDB, getNotesFromDB,
-         getAccountFromDB, addAccountOnDB, deleteNoteOnDB} from "./DBOperations.js"
+         getAccountFromDB, addAccountOnDB, deleteNoteOnDB, getPollsFromDB, updateVoteInDB, addPollOnDB} from "./DBOperations.js"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -321,6 +321,80 @@ app.post("/register", async (req, res) => {
             res.status(500).send(`Errore nella creazione dell'account ${error}`);
         });
 });
+
+
+
+app.get("/polls", isAuthenticated, async (req, res) => {
+    const userId = req.user.username; // Ottieni l'ID dell'utente loggato
+
+    try {
+        const polls = await getPollsFromDB(); // Recupera tutti i sondaggi
+        const pollsWithVoteStatus = polls.map(poll => {
+            const hasVoted = poll.options.some(opt => opt.voters && opt.voters.includes(userId)); // Verifica se l'utente ha già votato
+            const selectedOption = poll.options.find(opt => opt.voters && opt.voters.includes(userId)); // Trova l'opzione selezionata
+
+            return {
+                ...poll,
+                hasVoted, // Aggiungi lo stato del voto
+                selectedOption: selectedOption ? selectedOption.text : null, // Aggiungi l'opzione selezionata
+                userId // Aggiungi userId alla risposta
+            };
+        });
+
+        res.json(pollsWithVoteStatus); // Restituisci i sondaggi con lo stato del voto e userId
+    } catch (error) {
+        console.error("Errore nel recupero dei sondaggi:", error);
+        res.status(500).send("Errore nella lettura dei dati");
+    }
+});
+
+
+// Endpoint per registrare un voto
+app.post("/polls/vote", isAuthenticated, async (req, res) => {
+    const { pollId, optionText } = req.body;
+    const userId = req.user.username; // Otteniamo l'ID dell'utente loggato
+
+    if (!pollId || !optionText) {
+        return res.status(400).json({ success: false, error: 'Poll ID e/o testo opzione mancanti' });
+    }
+
+    try {
+        const success = await updateVoteInDB(pollId, optionText, userId);
+        if (success) {
+            res.json({ success: true, hasVoted: true }); // Risposta di successo
+        } else {
+            res.json({ success: false, error: 'Hai già votato per questo sondaggio', hasVoted: true });
+        }
+    } catch (error) {
+        console.error("Errore durante la registrazione del voto:", error);
+        res.status(500).json({ success: false, error: 'Errore durante la registrazione del voto' });
+    }
+});
+
+
+// Endpoint per salvare un nuovo sondaggio
+app.post("/polls", isAuthenticated, async (req, res) => {
+    const newPoll = req.body;
+    newPoll.id_user = req.user.username;
+
+    // Verifica che il sondaggio abbia un titolo e almeno due opzioni
+    if (!newPoll.title || !newPoll.options || newPoll.options.length < 2) {
+        return res.status(400).json({ error: "Il formato dei dati deve contenere 'title' e almeno 2 opzioni." });
+    }
+
+    try {
+        const pollId = await addPollOnDB(newPoll); // Ottieni l'ID del sondaggio
+        //console.log("ID del sondaggio creato:", pollId);
+        // Rispondi con l'ID del sondaggio in formato JSON
+        res.status(200).json({ success: true, pollId: pollId });
+    } catch (error) {
+        console.error("Errore durante la creazione del sondaggio:", error);
+        res.status(500).json({ error: `Errore nella scrittura del sondaggio: ${error.message}` });
+    }
+});
+
+
+
 
 // Rotta di login con Passport.js
 app.post('/login', passport.authenticate('local'), (req, res) => {

@@ -2,7 +2,7 @@ import {MongoClient, ObjectId} from "mongodb";
 
 const uri = "mongodb://127.0.0.1:27017";
 const dbName = "SELFIE";
-const tableNames = ["EVENT", "NOTE", "USER"];
+const tableNames = ["EVENT", "NOTE", "USER", "POLL"];
 
 /**
  * Ottiene tutti gli eventi dal db
@@ -69,6 +69,97 @@ export const deleteEventOnDB = async (eventId, username) => {
         await client.close();
     }
 };
+
+/**
+ * Ottiene tutti i sondaggi dal database
+ * @returns {Promise<WithId<Document>[]>}
+ */
+export const getPollsFromDB = async () => {
+    const client = new MongoClient(uri);
+    try {
+        const database = client.db(dbName);
+        await client.connect();
+        const collection = database.collection(tableNames[3]);
+
+        const polls = await collection.find({}).toArray(); // Recupera tutti i sondaggi
+        return polls;
+    } catch (error) {
+        console.error("Errore durante il recupero dei sondaggi:", error);
+        return [];
+    } finally {
+        await client.close();
+    }
+};
+
+/**
+ * Aggiorna i voti di un'opzione in un sondaggio, ma solo se l'utente non ha già votato
+ * @param {string} pollId - L'ID del sondaggio
+ * @param {string} optionText - Il testo dell'opzione che è stata votata
+ * @param {string} userId - L'ID dell'utente che sta votando
+ * @returns {Promise<boolean>} - Restituisce `true` se l'operazione è riuscita, `false` altrimenti
+ */
+export const updateVoteInDB = async (pollId, optionText, userId) => {
+    const client = new MongoClient(uri);
+    try {
+        const database = client.db(dbName);
+        await client.connect();
+        const collection = database.collection(tableNames[3]);
+
+        // Verifica se l'utente ha già votato per questo sondaggio
+        const poll = await collection.findOne({ _id: new ObjectId(pollId) });
+        const hasVoted = poll.options.some(opt => opt.voters && opt.voters.includes(userId));
+
+        if (hasVoted) {
+            // L'utente ha già votato per questo sondaggio
+            return false;
+        }
+
+        // Aggiungi l'utente all'elenco dei votanti per l'opzione selezionata
+        const result = await collection.updateOne(
+            { _id: new ObjectId(pollId), "options.text": optionText },
+            {
+                $push: { "options.$.voters": userId } // Aggiungi l'utente all'array `voters`
+            }
+        );
+
+        return result.modifiedCount > 0; // Se è stato modificato almeno un documento, il voto è stato registrato
+    } catch (error) {
+        console.error("Errore durante l'aggiornamento del voto:", error);
+        return false;
+    } finally {
+        await client.close();
+    }
+};
+
+// Funzione per aggiungere un sondaggio al database
+export const addPollOnDB = async (poll) => {
+    const client = new MongoClient(uri);
+    try {
+        await client.connect();
+        const database = client.db(dbName);
+        const collection = database.collection(tableNames[3]); // La collection dei sondaggi
+
+        // Assicurati che ogni opzione sia strutturata correttamente
+        const pollWithStructuredOptions = {
+            title: poll.title,
+            options: poll.options.map(option => ({
+                text: option,  // Il testo dell'opzione
+                voters: []     // Array vuoto inizialmente per i votanti
+            })),
+            id_user: poll.id_user
+        };
+
+        const result = await collection.insertOne(pollWithStructuredOptions); // Inserisce il sondaggio
+        //console.log("Sondaggio inserito:", result);
+        return result.insertedId; // Restituisce l'ID del sondaggio appena inserito
+    } catch (error) {
+        console.error("Errore durante l'inserimento del sondaggio:", error);
+        throw error; // Rilancia l'errore per essere gestito nel server
+    } finally {
+        await client.close();  // Chiudi la connessione al database
+    }
+};
+
 
 /**
  * Ottiene tutte le note dal db
