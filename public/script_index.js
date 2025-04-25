@@ -85,9 +85,9 @@ async function login(event){
          password: hashedPassword, // Invia l'hash invece della password in chiaro
       };
 
-      const serverName = "selfie-eyg7cnesbbh5egav.canadacentral-01.azurewebsites.net";
+      const serverName = "selfie-eyg7cnesbbh5egav.canadacentral-01.azurewebsites.net"; //'./login'
       // Invia i dati al server tramite una richiesta POST
-      const response = await fetch('./login', {
+      const response = await fetch(serverName, {
          method: 'POST',
          headers: {
             'Content-Type': 'application/json'

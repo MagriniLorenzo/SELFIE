@@ -94,11 +94,36 @@ async function fetchEvents() {
         .then((response) => response.text())
         .then((data) => {
             eventsArr = JSON.parse(data); // Popola l'array eventsArr con i dati
+
+            eventsArr.forEach((eventObj) => {
+                // let sDate = new Date(eventObj.start);
+                // let eDate = new Date(eventObj.start);
+
+                eventObj.start = convertUTCToLocalISO(eventObj.start);
+                eventObj.end =  convertUTCToLocalISO(eventObj.end);
+            });
         })
         .catch((error) => {
             console.error("Errore nel recupero degli eventi:", error); // Gestisce gli errori
         });
 }
+
+function convertUTCToLocalISO(utcDateStr) {
+    if(utcDateStr){
+    const date = new Date(utcDateStr); // crea data da stringa UTC
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // mese da 0 a 11
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    }else{
+        return "";
+    }
+}
+
 
 function changeStatus() {
     //to-do
@@ -134,6 +159,7 @@ function initCalendar(referenceDay = normalizeDate(today)) {
         let activity = "";
         let data = new Date(year, month, i);
         eventsArr.forEach((eventObj) => {
+
             let dayStart = normalizeDate(new Date(eventObj.start));
             let dayEnd = normalizeDate(new Date(eventObj.end));
             // if (eventObj.day === i && eventObj.month === month + 1 && eventObj.year === year) {
@@ -268,10 +294,18 @@ function getActiveDay(date) {
     eventDate.innerHTML = date + " " + months[month] + " " + year;
 }
 
+function formatLocalTime(utcString) {
+    const formatOptions = {hour: "2-digit", minute: "2-digit", hour12: true};
+
+    const date = new Date(utcString); // Convert the UTC string to a Date object
+    const formatter = new Intl.DateTimeFormat(undefined, formatOptions); // `undefined` uses the client's locale
+    return formatter.format(date); // Returns something like "12:15 PM"
+}
+
+
 //function update events when a day is active
 function updateEvents(date) {
     let events = "";
-    const formatOptions = {hour: "2-digit", minute: "2-digit", hour12: true};
 
     // Itera su tutti gli eventi in eventsArr
     eventsArr.forEach((event) => {
@@ -285,8 +319,8 @@ function updateEvents(date) {
             if (dayStart < data && data < dayEnd) {
                 formattedTimeRange = "all day";
             } else {
-                formattedStart = date === dayStart.getDate() ? (new Date(event.start)).toLocaleTimeString("it-IT", formatOptions) : "";
-                formattedEnd = date === dayEnd.getDate() ? (new Date(event.end)).toLocaleTimeString("it-IT", formatOptions) : "";
+                formattedStart = date === dayStart.getDate() ? formatLocalTime(event.start) : "";
+                formattedEnd = date === dayEnd.getDate() ? formatLocalTime(event.end) : "";
                 formattedTimeRange = `${formattedStart} - ${formattedEnd}`;
             }
 
@@ -302,8 +336,8 @@ function updateEvents(date) {
             <span class="event-time">${formattedTimeRange}</span>
           </div>
         </div>`;
-        } else if (event.start === "" && data.toLocaleDateString("it-IT") === dayEnd.toLocaleDateString("it-IT")) {
-            let formattedEnd = (new Date(event.end)).toLocaleTimeString("it-IT", formatOptions);
+        } else if (event.start === "" && data === dayEnd) {
+            let formattedEnd = formatLocalTime(event.end);
             let type = (today) > (new Date(event.end)) ? "activity expired" : "activity";
             // Aggiungi l'evento alla variabile events come HTML
             events += `
@@ -477,15 +511,12 @@ function addEvent() {
                 return;
             }
 
-            const startUTC = convertGmtToUTC(new Date(eventTimeFrom), 2);
-            const endUTC = convertGmtToUTC(new Date(eventTimeTo), 2);
-
 
             newEvent = {
                 title: eventTitle,
                 description: eventDescription,
-                start: startUTC.toISOString(),
-                end: endUTC.toISOString()
+                start: new Date(eventTimeFrom).toISOString(),
+                end: new Date(eventTimeTo).toISOString()
             };
 
             if (eventLocation) {
@@ -494,7 +525,7 @@ function addEvent() {
             if (eventFrequency) {
                 const options = {
                     freq: eventFrequency,
-                    dtstart: startUTC // Make sure this is a valid Date object
+                    dtstart: new Date(eventTimeFrom).toISOString() // Make sure this is a valid Date object
                 };
 
                 if (eventFrequency === "WEEKLY" && weekday) {
@@ -516,7 +547,7 @@ function addEvent() {
                 title: eventTitle,
                 description: eventDescription,
                 start: "",
-                end: eventTimeTo
+                end: new Date(eventTimeTo).toISOString()
             };
         }
 
@@ -640,10 +671,10 @@ function addEvent() {
     });
 
     addEventFrequency.addEventListener("change", (event) => {
-        if(addEventFrequency.value==="none"){
-            divUntil.style.display = "none";
-        }else {
+        if(addEventFrequency.value){
             divUntil.style.display = "flex";
+        }else {
+            divUntil.style.display = "none";
         }
 
         if (addEventFrequency.value === "WEEKLY") {
@@ -750,7 +781,7 @@ function isActivityInActiveDay(event) {
     const data = new Date(year, month, activeDay);
     const endDay = normalizeDate(new Date(event.end));
 
-    return endDay.toLocaleString("it-IT") === data.toLocaleString("it-IT");
+    return endDay === data;
 }
 
 function isEventInActiveDay(event) {

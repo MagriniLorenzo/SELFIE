@@ -35,8 +35,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Middleware
-app.use(cors({origin: 'http://localhost:3000', credentials: true}));
-//app.use(cors({ origin: 'https://selfie-eyg7cnesbbh5egav.canadacentral-01.azurewebsites.net/', credentials: true }));
+//app.use(cors({origin: 'http://localhost:3000', credentials: true}));
+app.use(cors({ origin: 'https://selfie-eyg7cnesbbh5egav.canadacentral-01.azurewebsites.net/', credentials: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 // app.use('/secure', isAuthenticated, express.static(path.join(__dirname, 'private')));
@@ -152,6 +152,8 @@ app.get("/events/iCalendar", isAuthenticated, (req, res) => {
                         const rruleLines = event.rrule.split('\n');
                         const rruleStr = rruleLines.find(line => line.startsWith('RRULE'));
                         e.repeating(rruleStr);
+                    }else{
+                        event.rrule="";
                     }
                 });
 
