@@ -434,13 +434,12 @@ body {
   width: 100%;
   height: 40px;
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   color: #a5a5a5;
 }
-.add-event-body .add-event-input input, .add-event-input select{
+.add-event-body .add-event-input input {
   width: 100%;
   height: 100%;
   outline: none;
@@ -451,13 +450,13 @@ body {
   font-weight: 400;
   color: #373c4f;
 }
-.add-event-body .add-event-input input::placeholder, .add-event-input select::placeholder {
+.add-event-body .add-event-input input::placeholder {
   color: #a5a5a5;
 }
-.add-event-body .add-event-input input:focus, .add-event-input select:focus{
+.add-event-body .add-event-input input:focus {
   border-bottom: 1px solid var(--primary-clr);
 }
-.add-event-body .add-event-input input:focus::placeholder, .add-event-input select:focus::placeholder {
+.add-event-body .add-event-input input:focus::placeholder {
   color: var(--primary-clr);
 }
 .add-event-footer {
@@ -900,9 +899,4 @@ button.do-event-btn:hover, button.delete-event-btn:hover {
   font-weight: bolder;
   color: #878895;
   margin: 10px 0 10px 0;
-}
-
-#div-weekday, #div-until{
-  display: none;
-  white-space: nowrap;
 }
