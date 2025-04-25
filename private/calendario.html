@@ -90,9 +90,8 @@
             <div id="location" class="add-event-input">
               <input type="text" class="add-event-location" placeholder="Where does this event take place?">
             </div>
-            <div id="frequency" class="add-event-input">
-              <label>
-                Frequency:
+              <div  id="frequency" class="add-event-input">
+                <p>Frequency:</p>
                 <select class="add-event-frequency">
                   <option value="none"></option>
                   <option value="DAILY">daily</option>
@@ -100,12 +99,29 @@
                   <option value="MONTHLY">monthly</option>
                   <option value="YEARLY">yearly</option>
                 </select>
-              </label>
-              <label>
-                Interval:
-                <input type="number" min="1" step="1" size="1" class="add-event-interval">
-              </label>
-            </div>
+              </div>
+<!--              <label>-->
+<!--                Interval:-->
+<!--                <input type="number" min="1" step="1" size="1" class="add-event-interval">-->
+<!--              </label>-->
+<!--            </div>-->
+<!--            <div id="repeatOptions">-->
+              <div id="div-weekday" class="add-event-input">
+                <p>Repeat On:</p>
+                <select id="weekday">
+                  <option value="MO">Monday</option>
+                  <option value="TU">Tuesday</option>
+                  <option value="WE">Wednesday</option>
+                  <option value="TH">Thursday</option>
+                  <option value="FR">Friday</option>
+                  <option value="SA">Saturday</option>
+                  <option value="SU">Sunday</option>
+                </select>
+              </div>
+              <div id="div-until" class="add-event-input">
+                <p>Until:</p>
+                <input type="datetime-local" id="until">
+              </div>
           </div>
           <div class="add-event-footer">
             <button class="add-event-btn">Add Event</button>
