@@ -3,8 +3,7 @@ var calendar, date, daysContainer, prev, next, todayBtn, gotoBtn, dateInput,
     eventDay, eventDate, eventsContainer, addEventBtn, addEventWrapper,
     addEventCloseBtn, addEventTitle, addEventFrom, addEventTo, addEventSubmit, divUntil,
     addEventDescription, eventType, divEventStart, viewActivityBtn, downloadEventsBtn, divWeekday,
-divFrequency, divLocation, viewActivityWrapper, viewActivityCloseBtn, doFullEventBtn, closeFullEventBtn,
-    addEventInterval, addEventFrequency, addEventLocation, viewActivityBody, resetTodayBtn, logOutBtn,
+divFrequency, divLocation, viewActivityWrapper, viewActivityCloseBtn, doFullEventBtn, closeFullEventBtn, addEventFrequency, addEventLocation, viewActivityBody, resetTodayBtn, logOutBtn,
     fullEventWrapper, fullEventTitle, fullEventTime, fullEventDescription, fullEventDates, deleteFullEventBtn;
 
 let today, activeDay, month, year;
@@ -47,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     addEventTo = document.querySelector(".event-time-to");
     addEventLocation = document.querySelector(".add-event-location");
     addEventFrequency = document.querySelector(".add-event-frequency");
-    addEventInterval = document.querySelector(".add-event-interval");
+    // addEventInterval = document.querySelector(".add-event-interval");
     addEventSubmit = document.querySelector(".add-event-btn");
     addEventDescription = document.querySelector(".event-description");
     eventType = document.getElementsByName("radio");
@@ -412,7 +411,17 @@ function addEvent() {
 
     //function to time machine
     downloadEventsBtn.addEventListener("click", () => {
-        window.location.href = "http://localhost:3000/events/iCalendar";
+        axios.get('/events/iCalendar', { responseType: 'blob' })
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'your_events.ics';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            });
     });
 
 
@@ -455,7 +464,7 @@ function addEvent() {
         const eventTimeTo = addEventTo.value;
         const eventLocation = addEventLocation.value;
         const eventFrequency = addEventFrequency.value;
-        let eventInterval = addEventInterval.value;
+        // let eventInterval = addEventInterval.value;
         const radio = document.querySelector('input[name="radio"]:checked');
         const weekday = document.getElementById("weekday")?.value; // You need .value here!
         const untilLocal = document.getElementById("until")?.value;
@@ -533,7 +542,7 @@ function addEvent() {
             addEventFrom.value = "";
             addEventTo.value = "";
             addEventDescription.value = "";
-            addEventInterval.value = "";
+            // addEventInterval.value = "";
             addEventFrequency.value = "";
             addEventLocation.value = "";
             addEventWrapper.classList.remove("active");

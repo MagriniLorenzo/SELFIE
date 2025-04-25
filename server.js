@@ -1,9 +1,4 @@
 import pkg from 'rrule';
-
-const {RRule} = pkg;
-const PORT = process.env.PORT || 3000;
-const EVENT_FILE_PATH = "./events.json";
-const NOTES_FILE_PATH = "./notes.json";
 import {ICalendar} from 'datebook';
 import express from 'express';
 import session from 'express-session';
@@ -15,10 +10,25 @@ import bcrypt from 'bcryptjs';
 import path from 'path';
 import {fileURLToPath} from "url";
 import {
-    getEventsFromDB, addEventOnDB, deleteEventOnDB,
-    addNoteOnDB, updateNoteOnDB, getNotesFromDB,
-    getAccountFromDB, addAccountOnDB, deleteNoteOnDB, getPollsFromDB, updateVoteInDB, addPollOnDB
+    addAccountOnDB,
+    addEventOnDB,
+    addNoteOnDB,
+    addPollOnDB,
+    deleteEventOnDB,
+    deleteNoteOnDB,
+    getAccountFromDB,
+    getEventsFromDB,
+    getNotesFromDB,
+    getPollsFromDB,
+    updateNoteOnDB,
+    updateVoteInDB
 } from "./DBOperations.js"
+import ical from "ical-generator";
+
+const {RRule} = pkg;
+const PORT = process.env.PORT || 3000;
+const EVENT_FILE_PATH = "./events.json";
+const NOTES_FILE_PATH = "./notes.json";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -124,54 +134,32 @@ app.get("/events/iCalendar", isAuthenticated, (req, res) => {
     //ottengo tutti gli eventi dell'utente
     getEventsFromDB(filter)
         .then((events) => {
-            // Se il file non esiste o è vuoto, restituisci un array vuoto
-            if (events) {
-                let newEvent = {
-                    title: events[0].title,
-                    description: events[0].description,
-                    start: new Date(events[0].start),
-                    end: new Date(events[0].end)
-                };
-                if (events[0].eventLocation) {
-                    newEvent.location = events[0].eventLocation;
-                }
+            if(events){
+                // Crea il calendario
+                const calendar = ical({ name: 'Eventi SELFIE' });
 
-                // if (events[0].eventFrequency && events[0].eventInterval) {
-                //     newEvent.recurrence = {
-                //         frequency: events[0].eventFrequency,
-                //         interval: events[0].eventInterval
-                //     }
-                // }
+                events.forEach(event => {
+                    const e = calendar.createEvent({
+                        start: new Date(event.start),
+                        end: new Date(event.end),
+                        summary: event.title,
+                        description: event.description,
+                        organizer: { name: event.id_user },
+                    });
 
-                if(events[0].rrule){
-                    newEvent.recurrence = rrule;
-                }
-
-                const icsEvents = new ICalendar(newEvent);
-
-                for (let i = 1; i < events.length; i++) {
-                    let newEvent = {
-                        title: events[i].title,
-                        description: events[i].description,
-                        start: new Date(events[i].start),
-                        end: new Date(events[i].end)
-                    };
-                    if (events[i].eventLocation) {
-                        newEvent.location = events[i].eventLocation;
+                    if (event.rrule) {
+                        // Estrai solo la parte RRULE (senza DTSTART)
+                        const rruleLines = event.rrule.split('\n');
+                        const rruleStr = rruleLines.find(line => line.startsWith('RRULE'));
+                        e.repeating(rruleStr);
                     }
-                    if (events[i].eventFrequency && events[i].eventInterval) {
-                        newEvent.recurrence = {
-                            frequency: events[i].eventFrequency,
-                            interval: events[i].eventInterval
-                        }
-                    }
+                });
 
-                    icsEvents.addEvent(new ICalendar(newEvent));
-                }
+                // Impostiamo gli header per il download
+                res.setHeader('Content-Disposition', 'attachment; filename="your_events.ics"');
+                res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+                res.send(calendar.toString());
 
-                res.setHeader("Content-Disposition", 'attachment; filename="your_events.ics"');
-                res.setHeader("Content-Type", "text/calendar");
-                res.send(icsEvents.render());
             } else {
                 res.status(404).send("No such event");
             }
