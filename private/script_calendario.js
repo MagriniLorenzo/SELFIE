@@ -648,6 +648,9 @@ function addEvent() {
 
         openFullEventView(event, removeActivity);
         fullEventWrapper.classList.add("active");
+
+        //faccio in modo che l'evento non venga propagato ulteriormente
+        e.stopPropagation();
     });
 
     window.addEventListener("pageshow", (event) => {
@@ -863,11 +866,7 @@ function openFullEventView(event, menageEvent) {
     // Imposta i contenuti dell'evento completo
     fullEventTitle.textContent = event.title;
     fullEventDescription.textContent = event.description;
-    let timeEnd = new Date(event.end);
-    fullEventTime.textContent = `completare entro - ${timeEnd.toLocaleTimeString("it-IT", {
-        hour: "2-digit",
-        minute: "2-digit"
-    })}`;
+    fullEventTime.textContent = `completare entro - ${formatLocalTime(event.end)}`;
     doFullEventBtn.setAttribute("data-id", event._id);
     deleteFullEventBtn.setAttribute("data-id", event._id);
 
