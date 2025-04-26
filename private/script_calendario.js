@@ -3,7 +3,8 @@ var calendar, date, daysContainer, prev, next, todayBtn, gotoBtn, dateInput,
     eventDay, eventDate, eventsContainer, addEventBtn, addEventWrapper,
     addEventCloseBtn, addEventTitle, addEventFrom, addEventTo, addEventSubmit, divUntil,
     addEventDescription, eventType, divEventStart, viewActivityBtn, downloadEventsBtn, divWeekday,
-divFrequency, divLocation, viewActivityWrapper, viewActivityCloseBtn, doFullEventBtn, closeFullEventBtn, addEventFrequency, addEventLocation, viewActivityBody, resetTodayBtn, logOutBtn,
+    divFrequency, divLocation, viewActivityWrapper, viewActivityCloseBtn, doFullEventBtn, closeFullEventBtn,
+    addEventFrequency, addEventLocation, viewActivityBody, resetTodayBtn, logOutBtn,
     fullEventWrapper, fullEventTitle, fullEventTime, fullEventDescription, fullEventDates, deleteFullEventBtn;
 
 let today, activeDay, month, year;
@@ -100,7 +101,7 @@ async function fetchEvents() {
                 // let eDate = new Date(eventObj.start);
 
                 eventObj.start = convertUTCToLocalISO(eventObj.start);
-                eventObj.end =  convertUTCToLocalISO(eventObj.end);
+                eventObj.end = convertUTCToLocalISO(eventObj.end);
             });
         })
         .catch((error) => {
@@ -109,17 +110,17 @@ async function fetchEvents() {
 }
 
 function convertUTCToLocalISO(utcDateStr) {
-    if(utcDateStr){
-    const date = new Date(utcDateStr); // crea data da stringa UTC
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // mese da 0 a 11
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+    if (utcDateStr) {
+        const date = new Date(utcDateStr); // crea data da stringa UTC
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // mese da 0 a 11
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
 
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-    }else{
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    } else {
         return "";
     }
 }
@@ -312,6 +313,7 @@ function updateEvents(date) {
         let data = new Date(year, month, date);
         let dayStart = normalizeDate(new Date(event.start));
         let dayEnd = normalizeDate(new Date(event.end));
+
         if (dayStart <= data && data <= dayEnd) {
             //formatto l'ora
             let formattedTimeRange;
@@ -327,31 +329,32 @@ function updateEvents(date) {
 
             // Aggiungi l'evento alla variabile events come HTML
             events += `
-        <div class="event">
-          <div class="title">
-            <i class="fas fa-circle"></i>
-            <h3 class="event-title">${event.title}</h3>
-          </div>
-          <div class="event-time">
-            <span class="event-time">${formattedTimeRange}</span>
-          </div>
-        </div>`;
-        } else if (event.start === "" && data === dayEnd) {
+                <div class="event">
+                  <div class="title">
+                    <i class="fas fa-circle"></i>
+                    <h3 class="event-title">${event.title}</h3>
+                  </div>
+                  <div class="event-time">
+                    <span class="event-time">${formattedTimeRange}</span>
+                  </div>
+                </div>`;
+        } else if (event.start === "" && data.getTime() === dayEnd.getTime()) {
             let formattedEnd = formatLocalTime(event.end);
             let type = (today) > (new Date(event.end)) ? "activity expired" : "activity";
             // Aggiungi l'evento alla variabile events come HTML
             events += `
-        <div class="${type}">
-          <div class="title">
-            <i class="fas fa-circle"></i>
-            <h3 class="activity-title">${event.title}</h3>
-          </div>
-          <div class="activity-time">
-            <span class="activity-time">${formattedEnd}</span>
-          </div>
-        </div>`;
+                <div class="${type}">
+                  <div class="title">
+                    <i class="fas fa-circle"></i>
+                    <h3 class="activity-title">${event.title}</h3>
+                  </div>
+                  <div class="activity-time">
+                    <span class="activity-time">${formattedEnd}</span>
+                  </div>
+                </div>`;
         }
     });
+
 
     // Se non ci sono eventi, mostra un messaggio di "No Events"
     if (events === "") {
@@ -445,7 +448,7 @@ function addEvent() {
 
     //function to time machine
     downloadEventsBtn.addEventListener("click", () => {
-        axios.get('/events/iCalendar', { responseType: 'blob' })
+        axios.get('/events/iCalendar', {responseType: 'blob'})
             .then(response => {
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const a = document.createElement('a');
@@ -614,7 +617,7 @@ function addEvent() {
         }
     });
 
-    //function to visualize the field for the input: event/actiivity
+    //function to visualize the field for the input: event/activity
     Array.from(eventType).forEach((radio) => {
         radio.addEventListener("change", (e) => {
             if (e.target.value === "event") {
@@ -674,9 +677,9 @@ function addEvent() {
     });
 
     addEventFrequency.addEventListener("change", (event) => {
-        if(addEventFrequency.value){
+        if (addEventFrequency.value) {
             divUntil.style.display = "flex";
-        }else {
+        } else {
             divUntil.style.display = "none";
         }
 
@@ -784,7 +787,7 @@ function isActivityInActiveDay(event) {
     const data = new Date(year, month, activeDay);
     const endDay = normalizeDate(new Date(event.end));
 
-    return endDay === data;
+    return endDay.getTime() === data.getTime();
 }
 
 function isEventInActiveDay(event) {
