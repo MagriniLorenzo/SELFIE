@@ -227,6 +227,7 @@ function addListner() {
             getActiveDay(e.target.innerHTML);
             updateEvents(Number(e.target.innerHTML));
             activeDay = Number(e.target.innerHTML);
+
             //remove active
             days.forEach((day) => {
                 day.classList.remove("active");
@@ -838,10 +839,16 @@ function formatDateToLocalISO(date) {
     return date.toISOString().slice(0, 16); // Formatta YYYY-MM-DDTHH:MM
 }
 
+
 function setEventData() {
-    // Ottieni data e ora attuali in fuso orario locale
-    let now = new Date(today);
-    now.setDate(activeDay);
+    // Crea una nuova data usando l'anno, mese e giorno selezionati
+    let now = new Date(year, month, activeDay);
+    
+    // Aggiungi l'ora corrente
+    const nowHours = new Date().getHours();
+    const nowMinutes = new Date().getMinutes();
+    now.setHours(nowHours, nowMinutes);
+    
     const nowFormatted = formatDateToLocalISO(now);
 
     // Aggiungi 30 minuti
