@@ -4,6 +4,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     height: 100vh;
     margin: 0;
 }
@@ -11,7 +12,6 @@ body {
 .widgets-container {
     display: flex;
     width: 50vw;
-    margin-top: -70px;
 }
 
 .widget-container {
@@ -30,10 +30,24 @@ body {
     height: 100vh;
 }
 
-.current-week h1, .events-today h2, .notes-header h1 {
+.current-week h1 {
     font-size: 20px;
     color: #333;
     text-align: center;
+}
+
+.events-today h2 {
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+    margin: 0;
+}
+
+.notes-header h1 {
+    font-size: 20px;
+    color: #333;
+    text-align: center;
+    margin: 0px;
 }
 
 .events-today {
@@ -52,7 +66,7 @@ body {
 }
 
 .week-days div {
-    font-size: 22px;
+    font-size: 20px;
     color: #333;
     cursor: pointer;
     text-align: center;
@@ -69,12 +83,15 @@ body {
 #events-list {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
 #events-list li {
     padding: 10px;
     border-bottom: 1px solid #ddd;
     color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #events-list li:last-child {
@@ -99,12 +116,13 @@ body {
 }
 
 .notes-widget .notes-content {
-    margin-top: 20px;
+    margin-top: 5px;
 }
 
 .notes-widget ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
 .notes-widget li {
@@ -119,17 +137,16 @@ body {
 .notes-widget li {
     padding: 10px;
     border-bottom: 1px solid #ddd;
-    color: #555; /* Grigio scuro per il testo */
+    color: #555;
     font-size: 14px;
 }
 
 .notes-widget li strong {
-    color: #333; /* Un colore piÃ¹ scuro per il titolo */
-    font-size: 17px;
+    color: #333;
 }
 
 .timer-header h1 {
-    font-size: 20px;
+    font-size: 22px;
     color: red;
     text-align: center;
     margin-bottom: 0px;
@@ -143,14 +160,38 @@ body {
 
 }
 
+.timer-content {
+    
+    text-align: center;
+}
+
+.poll-header h1 {
+    font-size: 22px;
+    color: #4dabf7;
+    text-align: center;
+    margin-bottom: 0px;
+}
+
+.poll-content img {
+
+    width: 35%;
+    object-fit: contain;
+    margin-top: 20px;
+
+}
+
+.poll-content {
+    
+    text-align: center;
+}
+
 nav{
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    justify-content:space-between;
     align-items: center;
-    justify-content:right;
-    width:80%;
-    height: 20%;
+    width: 50vw;
+    z-index: 1000;
 }
 
 nav > button{
@@ -163,6 +204,11 @@ nav > button{
     padding: 10px;
     max-height: 50px;
     margin: 5px;
+}
+
+nav > h1 {
+    color: #4CAF50;
+    font-size: xx-large;
 }
 
 #widget-calendar {
@@ -180,6 +226,53 @@ nav > button{
     .widgets-container {
         display: flex;
         width: 100vw;
-        margin-top: -60px;
+    }
+
+    #widget-timer {
+        padding-bottom: 18px;
+    }
+
+    nav {
+        width: 100vw;
+    }
+
+    .timer-header h1 {
+        font-size: 14px;
+        color: red;
+        text-align: center;
+        margin-bottom: 0px;
+        margin-top: 0px;
+    }
+    
+    .timer-content img {
+    
+        width: 84%;
+        object-fit: contain;
+    
+    }
+
+    .poll-header h1 {
+        font-size: 14px;
+        text-align: center;
+        margin-bottom: 0px;
+        margin-top: 0px;
+    }
+    
+    .poll-content img {
+    
+        margin-top: 13px;
+    
+    }
+}
+
+@media (min-width: 1950px) {
+
+    .widgets-container {
+        display: flex;
+        width: 38vw;
+    }
+
+    nav {
+        width: 38vw;
     }
 }

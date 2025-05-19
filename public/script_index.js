@@ -1,4 +1,3 @@
-// import {create} from "axios";
 let usernameField, passwordField, pErrorMsg;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -38,7 +37,7 @@ async function createAccount(event){
       };
 
       // Invia i dati al server tramite una richiesta POST
-      const response = await fetch('http://localhost:3000/register', {
+      const response = await fetch('/register', {
          method: 'POST',
          headers: {
             'Content-Type': 'application/json'
@@ -85,9 +84,8 @@ async function login(event){
          password: hashedPassword, // Invia l'hash invece della password in chiaro
       };
 
-      const serverName = "selfie-eyg7cnesbbh5egav.canadacentral-01.azurewebsites.net"; //'./login'
       // Invia i dati al server tramite una richiesta POST
-      const response = await fetch(serverName, {
+      const response = await fetch('/login', {
          method: 'POST',
          headers: {
             'Content-Type': 'application/json'

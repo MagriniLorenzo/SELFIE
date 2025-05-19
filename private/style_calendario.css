@@ -737,6 +737,7 @@ textarea{
   margin: 5px;
   border-radius: 5px;
   color: #878895;
+  gap: 5px;
 }
 
 .view-activity-body .activity::after{
@@ -811,31 +812,31 @@ textarea{
 
 .full-event-wrapper {
   display: none;
-  position: fixed; /* Per centrarlo rispetto alla finestra del browser */
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgb(153, 153, 153); /* Sfondo leggermente trasparente */
+  background-color: rgb(153, 153, 153);
   padding: 20px;
-  max-width: 90vw; /* Limita la larghezza al 90% della finestra */
-  max-height: 90vh; /* Limita l'altezza al 90% della finestra */
-  border-radius: 15px; /* Bordi arrotondati */
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Ombra elegante */
-  overflow: auto; /* Aggiunge lo scroll se il contenuto è troppo grande */
-  z-index: 1000; /* Assicura che sia sopra gli altri elementi */
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  overflow: auto;
+  z-index: 1000;
   color: black;
 }
 
 .full-event-wrapper.active {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Centra verticalmente */
-  align-items: center; /* Centra orizzontalmente */
+  justify-content: center;
+  align-items: center;
 }
 
 .full-event {
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   max-width: 300px;
@@ -846,10 +847,10 @@ textarea{
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
-  max-width: 100%; /* Ensures it doesn't overflow */
+  max-width: 100%;
 }
 
-.full-event .full-event-time{
+.full-event .full-event-time, .full-event .full-event-location{
   border-top: 2px solid var(--primary-clr);
   border-bottom: 2px solid var(--primary-clr);
   margin: 10px;

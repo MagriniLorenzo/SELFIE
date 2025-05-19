@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestione Note</title>
-<!-- Axios -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/private/script_note.js"></script>
   <link rel="stylesheet" href="/private/style_note.css">
-<!-- Quill -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
@@ -50,7 +48,6 @@
     </div>
 </div>
 
-
 <div class="full-note-wrapper">
   <div class="full-note">
     <div class="close-btn">
@@ -61,33 +58,12 @@
       <p class="full-note-content"></p>
       <div class="footer-note">
         <p class="full-note-dates"></p>
+        <button class="duplica-note-btn">Duplica</button>
         <button class="edit-note-btn">Modifica</button>
         <button class="delete-note-btn">Elimina</button>
       </div>
     </div>
   </div>
 </div>
-
-<script>
-  //Quill
-  var quill = new Quill('#editor', {
-    theme: 'snow',   // Tema di Quill
-    modules: {
-      toolbar: [
-        [{ 'header': '1' }],
-        [{ 'font': [] }],
-        [{ 'list': 'ordered'}],
-        [{ 'list': 'bullet' }],
-        ['bold'],
-        ['italic'],
-        ['underline'],
-        ['link'],
-        [{ 'align': [] }],
-        ['image'],
-      ]
-    }
-  });
-</script>
-
 </body>
 </html>

@@ -2,7 +2,7 @@ let notesArr = [];
 
 let notesContainer,notesList,addNoteBtn,
     addNoteWrapper,noteTitleInput,noteContentInput,
-    submitNoteBtn,closeNoteBtn,noteCategoriesInput,closebtn,editNoteBtn,deleteNoteBtn;
+    submitNoteBtn,closeNoteBtn,noteCategoriesInput,closebtn,editNoteBtn,deleteNoteBtn,duplicaNoteBtn;
 
 document.addEventListener("DOMContentLoaded", () => {
     notesContainer = document.querySelector(".notes-container");
@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     addNoteBtn = document.querySelector(".add-note-btn");
     addNoteWrapper = document.querySelector(".add-note-wrapper");
     noteTitleInput = document.querySelector(".note-title");
-    noteContentInput = document.querySelector(".note-content p");
+    quillEditor = null;
     submitNoteBtn = document.querySelector(".submit-note-btn");
     closeNoteBtn = document.querySelector(".close-note-btn");
     noteCategoriesInput = document.querySelector(".note-categories");
@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     closebtn = document.getElementById("closeFullNote");
     editNoteBtn = document.querySelector(".edit-note-btn");
     deleteNoteBtn = document.querySelector(".delete-note-btn");
+    duplicaNoteBtn = document.querySelector(".duplica-note-btn");
     fullNoteWrapper = document.querySelector(".full-note-wrapper");
     fullNoteTitle = document.querySelector(".full-note-title");
     fullNoteCategories = document.querySelector(".full-note-categories");
@@ -30,13 +31,27 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchNotes().then(() => {
         displayNotes();
     });
+
+    quillEditor = new Quill('#editor', {
+        theme: 'snow',   // Tema di Quill
+        modules: {
+          toolbar: [
+            [{ 'header': '1' }],
+            [{ 'font': [] }],
+            [{ 'list': 'ordered'}],
+            [{ 'list': 'bullet' }],
+            ['bold'],
+            ['italic'],
+            ['underline'],
+          ]
+        }
+    });
 });
 
 async function fetchNotes() {
     try {
-        const response = await axios.get("http://localhost:3000/notes");
+        const response = await axios.get("/notes");
         notesArr = response.data;
-        console.log(response.data);
 
 
         notesArr.sort((a, b) => {
@@ -81,7 +96,16 @@ function displayNotes() {
         const noteElement = document.createElement("div");
         noteElement.classList.add("note");
         noteElement.setAttribute("data-id", note._id);
-        const truncatedContent = note.content.length > 200 ? note.content.slice(0, 200) + "..." : note.content;
+
+        const plainText = note.content
+        .replace(/<\/?p>/gi, ' ')       // Sostituisco i tag <p> con spazi
+        .replace(/<[^>]*>/g, '')        // Rimuovo tutti gli altri tag HTML
+        .replace(/\s+/g, ' ')           // Rimuovo spazi multipli
+        .trim();                        // Rimuovo spazi iniziali/finali
+
+        const truncatedContent = plainText.length > 200
+        ? plainText.slice(0, plainText.lastIndexOf(' ', 200)) + "..."
+        : plainText;
 
         noteElement.innerHTML = `
                 <div class="nota">
@@ -100,29 +124,8 @@ function displayNotes() {
                     </div> -->
                 </div>`;
 
-        /*
-        const dropdownToggle = noteElement.querySelector(".dropdown-toggle");
-        const dropdownMenu = noteElement.querySelector(".dropdown-menu");
-
-        dropdownToggle.addEventListener("click", (event) => {
-            // Chiude tutti i menu aperti prima di aprirne uno nuovo
-            document.querySelectorAll(".dropdown-menu").forEach(menu => {
-                if (menu !== dropdownMenu) menu.classList.add("hidden");
-            });
-
-            dropdownMenu.classList.toggle("hidden");
-            event.stopPropagation(); // Impedisce la chiusura immediata
-        });
-
-        // Chiude il menu se si clicca fuori
-        document.addEventListener("click", (event) => {
-            if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
-                dropdownMenu.classList.add("hidden");
-            }
-        });*/
-
         // Evento per aprire la nota completa quando si clicca sul titolo
-        noteElement.querySelector(".note-title").addEventListener("click", () => {
+        noteElement.querySelector(".nota").addEventListener("click", () => {
             fullNoteWrapper.classList.add("active");
             openFullNoteView(note);
         });
@@ -132,27 +135,27 @@ function displayNotes() {
 }
 
 function openFullNoteView(note) {
-    // Imposta i contenuti della nota completa
     fullNoteTitle.textContent = note.title;
     fullNoteCategories.textContent = note.categories;
-    fullNoteContent.textContent = note.content;
+    fullNoteContent.innerHTML = note.content;
     fullNoteDates.textContent = `Creata il: ${note.createdAt} - Ultima modifica: ${note.updatedAt}`;
     editNoteBtn.setAttribute("data-id", note._id);
     deleteNoteBtn.setAttribute("data-id", note._id);
+    duplicaNoteBtn.setAttribute("data-id", note._id);
 
-    // Mostra la vista completa della nota
     fullNoteWrapper.classList.remove("hidden");
 
-    // Eventi per la chiusura della vista completa
     closebtn.addEventListener("click", () => {
         fullNoteWrapper.classList.remove("active");
     });
 
     deleteNoteBtn.removeEventListener("click", handleDeleteNote);
     editNoteBtn.removeEventListener("click", handleEditNote);
+    duplicaNoteBtn.removeEventListener("click", handleDuplicaNote);
 
     deleteNoteBtn.addEventListener("click", handleDeleteNote);
     editNoteBtn.addEventListener("click", handleEditNote);
+    duplicaNoteBtn.addEventListener("click", handleDuplicaNote);
 }
 
 function handleDeleteNote(event) {
@@ -170,23 +173,30 @@ function handleEditNote(event) {
     }
 }
 
+function handleDuplicaNote(event) {
+    const noteId = event.target.getAttribute("data-id");
+    const index = notesArr.findIndex(note => note._id === noteId);
+    if (index !== -1) {
+        duplicaNote(index);
+    }
+}
+
 async function addNote() {
     const newNote = {
         title: noteTitleInput.value,
         categories: noteCategoriesInput.value.split(',').map(cat => cat.trim()),
-        content: noteContentInput.innerHTML,
+        content: quillEditor.root.innerHTML,
         createdAt: new Date().toLocaleDateString("it-IT"),
         updatedAt: new Date().toLocaleDateString("it-IT")
     };
 
     try {
-        const response = await axios.post("http://localhost:3000/notes", newNote);
+        const response = await axios.post("/notes", newNote);
 
         const savedNote = {
             ...newNote,
             _id: response.data
         };
-
 
         notesArr.push(savedNote);
 
@@ -205,19 +215,16 @@ function editNote(index) {
     fullNoteWrapper.classList.remove("active");
     const noteToEdit = notesArr[index];
     noteTitleInput.value = noteToEdit.title;
-    noteContentInput.innerHTML = noteToEdit.content;
+    quillEditor.root.innerHTML = noteToEdit.content;
     noteCategoriesInput.value = noteToEdit.categories;
-
 
     document.querySelectorAll(".dropdown-menu").forEach(menu => {
         menu.classList.add("hidden");
     });
 
-    // FIX: Imposta la modalità su "edit" e salva l'indice della nota da modificare
     submitNoteBtn.dataset.mode = "edit";
     submitNoteBtn.dataset.index = index;
 
-    // FIX: Rimuove tutti gli event listener esistenti e aggiunge solo quello corretto
     submitNoteBtn.removeEventListener("click", addNote);
     submitNoteBtn.removeEventListener("click", updateNote);
     submitNoteBtn.addEventListener("click", updateNote);
@@ -233,14 +240,14 @@ async function updateNote() {
     const updatedNote = {
         title: noteTitleInput.value,
         categories: noteCategoriesInput.value.split(',').map(cat => cat.trim()),
-        content: noteContentInput.innerHTML,
+        content: quillEditor.root.innerHTML,
         createdAt: notesArr[index].createdAt,
         updatedAt: new Date().toLocaleDateString("it-IT")
 
     };
 
     try {
-        await axios.put(`http://localhost:3000/notes/${notesArr[index]._id}`, updatedNote);
+        await axios.put(`/notes/${notesArr[index]._id}`, updatedNote);
         updatedNote._id = notesArr[index]._id;
         notesArr[index] = updatedNote;
 
@@ -255,7 +262,7 @@ async function updateNote() {
 
 async function deleteNote(noteId) {
     try {
-        await axios.delete(`http://localhost:3000/notes/${noteId}`);
+        await axios.delete(`/notes/${noteId}`);
         notesArr = notesArr.filter((note) => note._id !== noteId);
         displayNotes();
         resetForm();
@@ -266,11 +273,47 @@ async function deleteNote(noteId) {
     }
 }
 
+async function duplicaNote(index) {
+    const noteToDuplicate = notesArr[index];
+    noteTitleInput.value = noteToDuplicate.title;
+    quillEditor.root.innerHTML = noteToDuplicate.content;
+    noteCategoriesInput.value = noteToDuplicate.categories;
+
+    const duplicateNote = {
+        title: noteToDuplicate.title + '_copia',
+        categories: noteToDuplicate.categories,
+        content: noteToDuplicate.content,
+        createdAt: new Date().toLocaleDateString("it-IT"),
+        updatedAt: new Date().toLocaleDateString("it-IT")
+    };
+
+    try {
+        const response = await axios.post("/notes", duplicateNote);
+
+        const savedNote = {
+            ...duplicateNote,
+            _id: response.data
+        };
+
+
+        notesArr.push(savedNote);
+
+        console.log(savedNote);
+
+        displayNotes();
+        resetForm();
+        alert("Nota duplicata con successo!");
+    } catch (error) {
+        console.error(error);
+        alert("Errore durante l'aggiunta della nota");
+    }
+
+}
+
 function addEvent() {
     addNoteBtn.addEventListener("click", () => {
         addNoteWrapper.classList.add("active");
 
-        // FIX: Imposta la modalità su "add"
         submitNoteBtn.dataset.mode = "add";
         submitNoteBtn.removeEventListener("click", updateNote);
         submitNoteBtn.removeEventListener("click", addNote);
@@ -286,24 +329,15 @@ function addEvent() {
             if (index !== -1) editNote(index);
         }
     });
-
-    /*
-    document.addEventListener("click", function (event) {
-        if (event.target.classList.contains("delete-note-btn")) {
-            const noteId = event.target.getAttribute("data-id");
-            if (noteId) deleteNote(noteId);
-        }
-    });*/
 }
 
 function resetForm() {
     noteTitleInput.value = "";
     noteCategoriesInput.value = "";
-    noteContentInput.innerHTML = "";
+    quillEditor.root.innerHTML = "";
     addNoteWrapper.classList.remove("active");
     fullNoteWrapper.classList.remove("active");
 
-    // FIX: Resetta la modalità in modo che l'evento corretto venga applicato dopo
     submitNoteBtn.dataset.mode = "add";
     submitNoteBtn.removeEventListener("click", updateNote);
     submitNoteBtn.removeEventListener("click", addNote);
@@ -328,13 +362,10 @@ function filterEntries() {
 }
 
 async function logOut(){
-    await fetch("http://localhost:3000/logout")
-        .then(res => res.json())
-        .then(dati => {
-            console.log(dati);
-            window.location.href = "/";
-        })
-        .catch(console.error);
-
+    try {
+        await axios.get("/logout")
+        window.location.href = "/";
+    } catch (error){
+        console.error(error);
+    }
 }
-

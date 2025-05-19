@@ -1,5 +1,4 @@
 import pkg from 'rrule';
-import {ICalendar} from 'datebook';
 import express from 'express';
 import session from 'express-session';
 import bodyParser from 'body-parser';
@@ -26,7 +25,7 @@ import {
 import ical from "ical-generator";
 
 const {RRule} = pkg;
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10255;
 const EVENT_FILE_PATH = "./events.json";
 const NOTES_FILE_PATH = "./notes.json";
 
@@ -35,12 +34,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Middleware
-//app.use(cors({origin: 'http://localhost:3000', credentials: true}));
-app.use(cors({ origin: 'https://selfie-eyg7cnesbbh5egav.canadacentral-01.azurewebsites.net/', credentials: true }));
+//app.use(cors({ origin: 'https://selfietutto-b6bkc4fphhhwbdbu.italynorth-01.azurewebsites.net', credentials: true }));
+app.use(cors({origin: 'http://localhost:10255', credentials: true}));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
-// app.use('/secure', isAuthenticated, express.static(path.join(__dirname, 'private')));
-
 app.use(bodyParser.urlencoded({extended: false}));
 
 // Configurazione sessione
@@ -97,7 +94,6 @@ function isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
-    // res.status(401).json({ message: 'Accesso negato. Effettua il login.' });
 
     res.redirect('/index.html'); // Reindirizza alla pagina di login
 }
@@ -175,9 +171,6 @@ app.get("/events/iCalendar", isAuthenticated, (req, res) => {
 app.post("/events", isAuthenticated, (req, res) => {
     const newEvent = req.body;
 
-    // if (!Array.isArray(newEvents)) {
-    //     return res.status(400).send("Il formato dei dati deve essere un array di eventi.");
-    // }
     //aggingo l'id dell'utente
     newEvent.id_user = req.user.username;
 
@@ -210,11 +203,7 @@ app.post("/events", isAuthenticated, (req, res) => {
 
 // Endpoint per eliminare un evento
 app.delete("/events", isAuthenticated, async (req, res) => {
-    const {title, description, start, end, attendees, recurrence, _id} = req.body; // Parametri dell'evento da eliminare
-
-    // if (!title || !description || !start || !end || !attendees || !recurrence || !_id) {
-    //     return res.status(400).send("I parametri 'title', 'description', 'start', 'end', 'attendees', 'recurrence', '_id' sono obbligatori.");
-    // }
+    const {_id} = req.body; // Parametri dell'evento da eliminare
 
     await deleteEventOnDB(_id, req.user.username)
         .then((events) => {
@@ -316,6 +305,12 @@ app.get("/home/timer", isAuthenticated, (req, res) => {
     res.sendFile(filePath)
 });
 
+// Endpoint per visualizzare il timer del pomodoro
+app.get("/home/sondaggi", isAuthenticated, (req, res) => {
+    const filePath = path.join(__dirname, "private", "sondaggi.html");
+    res.sendFile(filePath)
+});
+
 // Endpoint per creare un account
 app.post("/register", async (req, res) => {
     const userData = req.body;
@@ -401,7 +396,6 @@ app.post("/polls", isAuthenticated, async (req, res) => {
 
     try {
         const pollId = await addPollOnDB(newPoll); // Ottieni l'ID del sondaggio
-        //console.log("ID del sondaggio creato:", pollId);
         // Rispondi con l'ID del sondaggio in formato JSON
         res.status(200).json({success: true, pollId: pollId});
     } catch (error) {
@@ -454,7 +448,7 @@ app.get("/", (req, res) => {
 });
 
 // Avvio del server
-app.listen(PORT, () => console.log(`Server in esecuzione su http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server in esecuzione`));
 
 /**
  * Function per verificare che variable sia un JSON non vuoto
@@ -468,51 +462,6 @@ function isNonEmptyJSON(variable) {
         Object.keys(variable).length > 0;
 }
 
-// function expandRecurringEvents(events) {
-//     let expandedEvents = [];
-//
-//     for (const event of events){
-//         if (event.rrule) {
-//             const dateStart = new Date(event.start);
-//             const dateEnd = new Date(event.end);
-//             // const freqMap = {
-//             //     DAILY: RRule.RRule.DAILY,
-//             //     WEEKLY: RRule.RRule.WEEKLY,
-//             //     MONTHLY: RRule.RRule.MONTHLY,
-//             //     YEARLY: RRule.RRule.YEARLY
-//             // };
-//             //
-//             // const rule = new RRule.RRule({
-//             //     freq: freqMap[event.recurrence.frequency],
-//             //     interval: event.recurrence.interval,
-//             //     dtstart: RRule.datetime(dateStart.getFullYear(),dateStart.getMonth()+1,dateStart.getDate(),dateStart.getHours(),dateStart.getMinutes()),
-//             // });
-//             //
-//             // const occurrences = rule.all();
-//             //
-//             // occurrences.forEach((date) => {
-//             //     if (date.getTime() !== new Date(event.start).getTime()) {
-//             //         const newEvent = {
-//             //             ...event,
-//             //             start: date,
-//             //             end: new Date(date.getTime() + (new Date(event.end) - new Date(event.start))),
-//             //             originalStart: event.start,
-//             //         };
-//             //         delete newEvent.recurrence;
-//             //         expandedEvents.push(newEvent);
-//             //     }
-//             // });
-//
-//             const newInstances = generateRecurringInstances(event,dateStart,dateEnd);
-//             expandedEvents.push(newInstances);
-//         }else{
-//             expandedEvents.push(event);
-//         }
-//     }
-//
-//     return expandedEvents;
-// }
-
 // Add minutes to a Date
 function addMinutes(date, minutes) {
     return new Date(date.getTime() + minutes * 60000);
@@ -525,9 +474,6 @@ function expandEvent(event, rangeStart, rangeEnd) {
     const duration = (dtEnd - dtStart) / 60000; // calculate real duration; // in minutes
 
     const rule = new RRule.fromString(event.rrule);
-    // rule.options.dtstart = dtStart;
-    //
-    // const dates = rule.between(rangeStart, rangeEnd);
 
     const dates = rule.all();
 
@@ -552,10 +498,7 @@ function expandRecurringEvents(events) {
                 expandedEvents.push(...instances);
             } else {
                 // // Push only if it's within range
-                // const eventStart = new Date(event.start);
-                // if (eventStart >= rangeStart && eventStart <= rangeEnd) {
                 expandedEvents.push(event);
-                // }
             }
         }
     } catch (e) {

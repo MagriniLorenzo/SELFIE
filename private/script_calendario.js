@@ -1,10 +1,10 @@
 // Dichiarazione delle variabili globali
-var calendar, date, daysContainer, prev, next, todayBtn, gotoBtn, dateInput,
-    eventDay, eventDate, eventsContainer, addEventBtn, addEventWrapper,
+let calendar, date, daysContainer, prev, next, todayBtn, gotoBtn, dateInput, untilLocalAddEvent,
+    eventDay, eventDate, eventsContainer, addEventBtn, addEventWrapper, radioAddEvent, weekdayAddEvent,
     addEventCloseBtn, addEventTitle, addEventFrom, addEventTo, addEventSubmit, divUntil,
     addEventDescription, eventType, divEventStart, viewActivityBtn, downloadEventsBtn, divWeekday,
     divFrequency, divLocation, viewActivityWrapper, viewActivityCloseBtn, doFullEventBtn, closeFullEventBtn,
-    addEventFrequency, addEventLocation, viewActivityBody, resetTodayBtn, logOutBtn,
+    addEventFrequency, addEventLocation, viewActivityBody, resetTodayBtn, logOutBtn, fullLeventLocation,
     fullEventWrapper, fullEventTitle, fullEventTime, fullEventDescription, fullEventDates, deleteFullEventBtn;
 
 let today, activeDay, month, year;
@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     addEventTo = document.querySelector(".event-time-to");
     addEventLocation = document.querySelector(".add-event-location");
     addEventFrequency = document.querySelector(".add-event-frequency");
-    // addEventInterval = document.querySelector(".add-event-interval");
     addEventSubmit = document.querySelector(".add-event-btn");
     addEventDescription = document.querySelector(".event-description");
     eventType = document.getElementsByName("radio");
@@ -60,6 +59,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     logOutBtn = document.querySelector("#LogOut");
     resetTodayBtn = document.querySelector(".resetToday-btn");
     divFrequency = document.getElementById("frequency");
+    divWeekday = document.getElementById("div-weekday");
+    divUntil = document.getElementById("div-until");
     divLocation = document.getElementById("location");
     fullEventWrapper = document.querySelector(".full-event-wrapper");
     fullEventTitle = document.querySelector(".full-event-title");
@@ -71,7 +72,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     closeFullEventBtn = document.getElementById("closeFullEvent");
     divWeekday = document.getElementById("div-weekday");
     divUntil = document.getElementById("div-until");
-
+    fullLeventLocation = document.getElementById("eventLocation");
+    radioAddEvent = document.querySelector('input[name="radio"]:checked');
+    weekdayAddEvent = document.getElementById("weekday");
+    untilLocalAddEvent = document.getElementById("until");
 
     today = await getToday();
     if (!today) {
@@ -91,15 +95,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function fetchEvents() {
-    return fetch("http://localhost:3000/events")
-        .then((response) => response.text())
-        .then((data) => {
-            eventsArr = JSON.parse(data); // Popola l'array eventsArr con i dati
+    return axios.get("/events")
+        .then((response) => {
+            eventsArr = response.data; // Popola l'array eventsArr con i dati
 
             eventsArr.forEach((eventObj) => {
-                // let sDate = new Date(eventObj.start);
-                // let eDate = new Date(eventObj.start);
-
                 eventObj.start = convertUTCToLocalISO(eventObj.start);
                 eventObj.end = convertUTCToLocalISO(eventObj.end);
             });
@@ -125,16 +125,8 @@ function convertUTCToLocalISO(utcDateStr) {
     }
 }
 
-
-function changeStatus() {
-    //to-do
-}
-
 //function to add days in days with class day and prev-date next-date on previous month and next month days and active on today
 function initCalendar(referenceDay = normalizeDate(today)) {
-    //setto randomicamente lo stato degli eventi passati
-    changeStatus();
-
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const prevLastDay = new Date(year, month, 0);
@@ -227,7 +219,6 @@ function addListner() {
             getActiveDay(e.target.innerHTML);
             updateEvents(Number(e.target.innerHTML));
             activeDay = Number(e.target.innerHTML);
-
             //remove active
             days.forEach((day) => {
                 day.classList.remove("active");
@@ -287,10 +278,8 @@ function getActiveDay(date) {
     const day = new Date(year, month, date);
 
     // Ottieni il nome del giorno della settimana in italiano
-    const dayName = day.toLocaleDateString('it-IT', {weekday: 'long'});
-
     // Aggiorna eventDay con il nome del giorno in italiano
-    eventDay.innerHTML = dayName;
+    eventDay.innerHTML = day.toLocaleDateString('it-IT', {weekday: 'long'});
 
     // Aggiorna eventDate con il formato giorno mese anno
     eventDate.innerHTML = date + " " + months[month] + " " + year;
@@ -326,7 +315,6 @@ function updateEvents(date) {
                 formattedEnd = date === dayEnd.getDate() ? formatLocalTime(event.end) : "";
                 formattedTimeRange = `${formattedStart} - ${formattedEnd}`;
             }
-
 
             // Aggiungi l'evento alla variabile events come HTML
             events += `
@@ -388,18 +376,6 @@ function defineProperty() {
     document.body.appendChild(osccred);
 }
 
-function convertTime(time) {
-    //convert time to 24 hour format
-    let timeArr = time.split(":");
-    let timeHour = timeArr[0];
-    let timeMin = timeArr[1];
-    let timeFormat = timeHour >= 12 ? "PM" : "AM";
-    timeHour = timeHour % 12 || 12;
-    time = timeHour + ":" + timeMin + " " + timeFormat;
-    return time;
-}
-
-
 /**
  Aggiunta eventi agli elementi del dom
  */
@@ -421,6 +397,23 @@ function addEvent() {
         await setToday(new Date());
         initCalendar();
     });
+
+    async function setToday(date) {
+        today = new Date(date);
+        month = today.getMonth();
+        year = today.getFullYear();
+
+        try {
+            await axios.post('/setToday', { newDate: today }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (error) {
+            console.error("Errore:", error);
+            alert("Errore:"+error)
+        }
+    }
 
     dateInput.addEventListener("input", (e) => {
         if (dateInput.value.length > 10) {
@@ -446,29 +439,30 @@ function addEvent() {
         viewActivityWrapper.classList.remove("active");
     });
 
-
     //function to time machine
-    downloadEventsBtn.addEventListener("click", () => {
-        axios.get('/events/iCalendar', {responseType: 'blob'})
-            .then(response => {
-                const url = window.URL.createObjectURL(new Blob([response.data]));
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'your_events.ics';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                URL.revokeObjectURL(url);
-            });
+    downloadEventsBtn.addEventListener("click", async () => {
+        try {
+            await axios.get('/events/iCalendar', {responseType: 'blob'})
+                .then(response => {
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'your_events.ics';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                });
+        } catch (e) {
+            alert("Errore: " + e);
+        }
     });
 
 
 //function to add event
     addEventBtn.addEventListener("click", () => {
         const selectedRadio = document.querySelector('input[name="radio"]:checked');
-        if (selectedRadio.value === "event") {
-            setEventData();
-        }
+        setInputDefaultData();
 
         addEventWrapper.classList.toggle("active");
     });
@@ -502,19 +496,17 @@ function addEvent() {
         const eventTimeTo = addEventTo.value;
         const eventLocation = addEventLocation.value;
         const eventFrequency = addEventFrequency.value;
-        // let eventInterval = addEventInterval.value;
-        const radio = document.querySelector('input[name="radio"]:checked');
-        const weekday = document.getElementById("weekday")?.value; // You need .value here!
-        const untilLocal = document.getElementById("until")?.value;
+        radioAddEvent = document.querySelector('input[name="radio"]:checked');
+        let radio = radioAddEvent.value;
+        let weekday = weekdayAddEvent.value;
+        let untilLocal = untilLocalAddEvent.value;
         let newEvent;
 
-
-        if (radio.value === "event") {
+        if (radio === "event") {
             if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "" || eventDescription === "") {
                 alert("Please fill all the fields");
                 return;
             }
-
 
             newEvent = {
                 title: eventTitle,
@@ -542,7 +534,7 @@ function addEvent() {
 
                 newEvent.rrule = options;
             }
-        } else if (radio.value === "activity") {
+        } else if (radio === "activity") {
             if (eventTitle === "" || eventTimeTo === "" || eventDescription === "") {
                 alert("Please fill all the fields");
                 return;
@@ -555,32 +547,24 @@ function addEvent() {
             };
         }
 
-
         try {
             // Invia l'evento al server
-            const response = await fetch("http://localhost:3000/events", {
-                method: "POST",
+            await axios.post("/events", newEvent,{
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(newEvent), // L'API si aspetta un array di eventi
             });
-
-            if (!response.ok) {
-                throw new Error("Errore durante il salvataggio dell'evento");
-            }
-
-            await response.text(); // Leggi la risposta come testo
 
             // Reset dei campi di input
             addEventTitle.value = "";
             addEventFrom.value = "";
             addEventTo.value = "";
             addEventDescription.value = "";
-            // addEventInterval.value = "";
-            addEventFrequency.value = "";
             addEventLocation.value = "";
             addEventWrapper.classList.remove("active");
+            addEventFrequency.value = "";
+            weekdayAddEvent.value = "";
+            untilLocalAddEvent.value = "";
 
             // Aggiorna la UI
             await fetchEvents(); // Aspetta il completamento di fetchEvents
@@ -601,19 +585,18 @@ function addEvent() {
         );
 
         if (selectedDayEvents.length) {
-            let nodes = Array.from(e.target.parentNode.children);
-            // Trova l'indice dell'elemento cliccato tra i figli
-            const indexOfClicked = nodes.indexOf(e.target);
+            if(eventsContainer !== e.target && eventsContainer.contains(e.target)   ) {
+                let nodes = Array.from(e.target.parentNode.children);
+                // Trova l'indice dell'elemento cliccato tra i figli
+                const indexOfClicked = nodes.indexOf(e.target);
 
-            if (indexOfClicked !== -1) {
-                const eventToDelete = selectedDayEvents[indexOfClicked];
-                if (eventToDelete) {
-                    openFullEventView(eventToDelete, removeEvent);
-                    fullEventWrapper.classList.add("active");
+                if (indexOfClicked !== -1) {
+                    const eventToDelete = selectedDayEvents[indexOfClicked];
+                    if (eventToDelete) {
+                        openFullEventView(eventToDelete, removeEvent);
+                        fullEventWrapper.classList.add("active");
+                    }
                 }
-                /*else {
-                  alert(`evento o  attivita non trovata.`);
-                }*/
             }
         }
     });
@@ -622,20 +605,22 @@ function addEvent() {
     Array.from(eventType).forEach((radio) => {
         radio.addEventListener("change", (e) => {
             if (e.target.value === "event") {
-                setEventData();
                 divEventStart.style.display = "flex";
                 divFrequency.style.display = "flex";
                 divLocation.style.display = "flex";
                 addEventSubmit.innerText = "Add Event";
             } else if (e.target.value === "activity") {
                 //elimino data e ora se impostate
-                addEventTo.value = "";
-                addEventFrom.value = "";
                 divEventStart.style.display = "none";
                 divFrequency.style.display = "none";
                 divLocation.style.display = "none";
+                divUntil.style.display = "none";
+                divWeekday.style.display = "none";
                 addEventSubmit.innerText = "Add Activity";
+                addEventFrequency.selectedIndex = 0;
             }
+
+            e.stopPropagation()
         })
     });
 
@@ -712,63 +697,36 @@ function removeActivity(activityToDelete) {
     }
 }
 
-function deleteEventOnDB(eventToDelete, type) {
-    // Rimuovi l'evento dal db
-    fetch(`http://localhost:3000/events`, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(eventToDelete),
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error("Errore durante l'eliminazione dell'evento");
+async function deleteEventOnDB(eventToDelete, type) {
+    try {
+        // Rimuovi l'evento dal db
+        await axios.delete('/events', {
+            data: eventToDelete,
+            headers: {
+                'Content-Type': 'application/json'
             }
-
-            for (let i = eventsArr.length - 1; i >= 0; i--) {
-                if (eventsArr[i]._id === eventToDelete._id) {
-                    eventsArr.splice(i, 1);
-                }
-            }
-
-
-            //aggiorna l'interfaccia
-            initCalendar(new Date(year, month, activeDay));
         })
-        .catch((error) => {
-            console.error(error);
-            alert(`Errore durante l'eliminazione dell'${type}.`);
-        });
+        for (let i = eventsArr.length - 1; i >= 0; i--) {
+            if (eventsArr[i]._id === eventToDelete._id) {
+                eventsArr.splice(i, 1);
+            }
+        }
+
+        //aggiorna l'interfaccia
+        initCalendar(new Date(year, month, activeDay));
+
+    } catch(error) {
+        console.error(error);
+        alert(`Errore durante l'eliminazione dell'${type}.`);
+    }
 }
 
 async function logOut() {
-    await fetch("http://localhost:3000/logout")
-        .then(res => res.json())
-        .then(dati => {
-            window.location.href = "/";
-        })
-        .catch(console.error);
-}
-
-async function setToday(date) {
-    today = new Date(date);
-    month = today.getMonth();
-    year = today.getFullYear();
-
     try {
-        const response = await fetch("http://localhost:3000/setToday", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({newDate: today})
-        });
-
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.error || "Errore nell'invio della data");
-        }
-    } catch (error) {
-        console.error("Errore:", error);
+        await axios.get("/logout")
+        window.location.href = "/";
+    }catch(error){
+        console.error("impossibile effetuare il logout");
     }
 }
 
@@ -791,14 +749,6 @@ function isActivityInActiveDay(event) {
     return endDay.getTime() === data.getTime();
 }
 
-function isEventInActiveDay(event) {
-    const data = new Date(year, month, activeDay);
-    const dayStart = normalizeDate(new Date(event.start));
-    const dayEnd = normalizeDate(new Date(event.end));
-
-    return data.toLocaleString("it-IT") === dayStart.toLocaleString("it-IT") && data.toLocaleString("it-IT") === dayEnd.toLocaleString("it-IT");
-}
-
 function loadActivity() {
     const activity = eventsArr.filter((a) => a.start === "");
     let newActivity = "";
@@ -807,8 +757,6 @@ function loadActivity() {
     activity.sort((a, b) => a.end.localeCompare(b.end));
 
     activity.forEach((a) => {
-        // const tempToday = new Date();
-        // tempToday.setDate(today.getDate());
         const timeEnd = new Date(a.end);
         let type = (today) > (timeEnd) ? "activity expired" : "activity";
         newActivity += `
@@ -818,7 +766,10 @@ function loadActivity() {
             <h3 class="activity-title">${a.title}</h3>
           </div>
           <div class="activity-time">
-            <span class="activity-time">completare entro - ${timeEnd.toLocaleTimeString("it-IT", {
+            <span class="activity-time">completare entro - ${timeEnd.toLocaleString("it-IT", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
             hour: "2-digit",
             minute: "2-digit"
         })}</span>
@@ -839,8 +790,7 @@ function formatDateToLocalISO(date) {
     return date.toISOString().slice(0, 16); // Formatta YYYY-MM-DDTHH:MM
 }
 
-
-function setEventData() {
+function setInputDefaultData() {
     // Crea una nuova data usando l'anno, mese e giorno selezionati
     let now = new Date(year, month, activeDay);
     
@@ -862,9 +812,8 @@ function setEventData() {
 
 async function getToday() {
     try {
-        const response = await fetch("http://localhost:3000/get-today");
-        if (!response.ok) throw new Error("Errore nel recupero della data");
-        const data = await response.json();
+        const response = await axios.get("/get-today");
+        const data = response.data;
         return new Date(data.today); // Converte la stringa ISO in oggetto Date
     } catch (error) {
         console.error("Errore:", error);
@@ -873,13 +822,11 @@ async function getToday() {
 }
 
 function openFullEventView(event, menageEvent) {
-    // Imposta i contenuti dell'evento completo
+    // Imposta i contenuti dell'attività completo
     fullEventTitle.textContent = event.title;
     fullEventDescription.textContent = event.description;
-    fullEventTime.textContent = `completare entro - ${formatLocalTime(event.end)}`;
     doFullEventBtn.setAttribute("data-id", event._id);
     deleteFullEventBtn.setAttribute("data-id", event._id);
-
     // Mostra la vista completa della nota
     fullEventWrapper.classList.remove("hidden");
 
@@ -900,15 +847,19 @@ function openFullEventView(event, menageEvent) {
     //assegno i nuovi eventi
     deleteFullEventBtn.addEventListener("click", () => menageEvent(event));
     doFullEventBtn.addEventListener("click", () => menageEvent(event));
-}
 
-function convertGmtToUTC(dateStr, hourFromUTC) {
-    // Parse the date as if it's in local GMT+2 time
-    const localDate = new Date(dateStr);
+    //ripulisco il contenuto di location
+    fullLeventLocation.textContent = "";
+    fullLeventLocation.style.display = "none";
 
-    // Get the time in milliseconds
-    const utcMillis = localDate.getTime() - (hourFromUTC * 60 * 60 * 1000);
-
-    // Return as ISO string with Z (UTC)
-    return new Date(utcMillis);
+    //controllo se sto visualizzando un attività o un evento
+    if (event.start === "") {
+        fullEventTime.textContent = `completare entro - ${formatLocalTime(event.end)}`;
+    } else {
+        fullEventTime.textContent = `${formatLocalTime(event.start)} - ${formatLocalTime(event.end)}`;
+        if (event.location) {
+            fullLeventLocation.textContent = `luogo: ${event.location}`;
+            fullLeventLocation.style.display = "flex";
+        }
+    }
 }

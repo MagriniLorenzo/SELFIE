@@ -1,0 +1,244 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: #f0f4f8;
+    padding: 20px;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.create-poll {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    max-width: 20vw;
+    width: 100%;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.create-poll h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.create-poll input {
+    font-size: 16px;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.create-poll button {
+    padding: 8px 15px;
+    background: #4dabf7;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.create-poll button:hover {
+    background: #339af0;
+}
+
+.polls-container {
+    display: grid;
+    grid-template-columns: 20vw repeat(auto-fit, minmax(0, 20vw));
+    gap: 20px;
+    width: 100%;
+}
+
+.polls-container::before {
+    content: "";
+    width: 20vw;
+}
+
+.wrapper {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 20vw;
+}
+
+.wrapper header {
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.poll-area label {
+    display: block;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 2px solid #e6e6e6;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.poll-area label:hover {
+    border-color: #a0c4ff;
+}
+
+label.selected {
+    border-color: #4dabf7;
+}
+
+label.voted {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+label .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+label .row .column {
+    display: flex;
+    align-items: center;
+}
+
+label .row .circle {
+    height: 20px;
+    width: 20px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    margin-right: 10px;
+    position: relative;
+}
+
+label.selected .row .circle {
+    border-color: #4dabf7;
+}
+
+label .row .circle::after {
+    content: "";
+    height: 12px;
+    width: 12px;
+    background: #4dabf7;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+}
+
+label.selected .row .circle::after {
+    display: block;
+}
+
+label .row .text {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+label .progress {
+    height: 8px;
+    width: 100%;
+    background: #f0f0f0;
+    border-radius: 20px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+label .progress::after {
+    content: "";
+    height: 100%;
+    width: var(--w);
+    background: #4dabf7;
+    display: block;
+    transition: width 0.3s ease;
+}
+
+label .percent {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+input[type="checkbox"] {
+    display: none;
+}
+
+.circle {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.circle.filled {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+}
+
+button:disabled {
+    background-color: #d3d3d3;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .create-poll {
+        position: relative;
+        top: auto;
+        left: auto;
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .polls-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .polls-container::before {
+        display: none;
+    }
+
+    .wrapper {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .wrapper header {
+        font-size: 20px;
+    }
+
+    label .row .text {
+        font-size: 14px;
+    }
+
+    label .percent {
+        font-size: 12px;
+    }
+}

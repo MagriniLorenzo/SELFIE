@@ -2,6 +2,7 @@
     margin: 0;
     padding: 0;
     font-family: "Poppins", sans-serif;
+    box-sizing: border-box;
 }
 
 body {
@@ -13,8 +14,7 @@ body {
     text-align: center;
 }
 
-button{
-
+button {
     background-color: #a73e3e;
     border: none;
     border-radius: 5px;
@@ -24,48 +24,200 @@ button{
     cursor: pointer;
 }
 
-button:hover, button.active{
-
+button:hover,
+button.active {
     background-color: white;
     color: #a73e3e;
 }
 
 .timer-display {
-    font-size: 4rem;
     margin-top: 20px;
-    font-weight: bold;
+    margin-bottom: 20px;
 }
-
 
 #title {
-    grid-area: h;
     text-align: center;
-    justify-self: stretch;
-    font-size: 5rem;
+    font-size: 80px;
+    margin-top: 5vh;
 }
 
-nav{
-    display: grid;
-    grid-template-areas: ". h b";
-    grid-template-columns: 1fr 3fr 1fr;
-    justify-content: stretch;
-    align-items: center;
-    width:100%;
-    height: 10%;
-    margin-bottom: 50px ;
+nav {
+    padding: 20px 20px 40px;
+    box-sizing: border-box;
 }
 
-#LogOut{
-    grid-area: b;
+#LogOut {
+    position: absolute;
+    top: 20px;
+    right: 20px;
     background-color: white;
     color: #e05151;
     font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    font-size: medium;
-    margin: 10px;
-    padding: 10px;
-    max-height: 50px;
-    justify-items: stretch;
-    width: 50%;
+    cursor: pointer;
+}
+
+.flip-card {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    font-size: 100px;
+    color: #a73e3e;
+    width: 150px;
+    text-align: center;
+    font-family: "Courier New", monospace;
+}
+
+.top,
+.bottom,
+.flip-card .top-flip,
+.flip-card .bottom-flip {
+    height: 0.75em;
+    line-height: 1;
+    padding: 0.25em 0;
+    overflow: hidden;
+    width: 100%;
+    justify-content: center;
+}
+
+.top,
+.flip-card .top-flip {
+    background-color: #f7f7f7;
+    border-top-right-radius: 0.1em;
+    border-top-left-radius: 0.1em;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.bottom,
+.flip-card .bottom-flip {
+    background-color: white;
+    display: flex;
+    align-items: flex-end;
+    border-bottom-right-radius: 0.1em;
+    border-bottom-left-radius: 0.1em;
+}
+
+.flip-card .top-flip {
+    position: absolute;
+    width: 100%;
+    animation: flip-top 250ms ease-in;
+    transform-origin: bottom;
+}
+
+.container-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 100px;
+    padding: 0 10px;
+}
+
+@keyframes flip-top {
+    100% {
+        transform: rotateX(90deg);
+    }
+}
+
+.flip-card .bottom-flip {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    animation: flip-bottom 250ms ease-out 250ms;
+    transform-origin: top;
+    transform: rotateX(90deg);
+}
+
+@keyframes flip-bottom {
+    100% {
+        transform: rotateX(0deg);
+    }
+}
+
+.container {
+    display: flex;
+    gap: 0.5em;
+    justify-content: center;
+}
+
+.container-segment {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1em;
+    align-items: center;
+}
+
+.segment {
+    display: flex;
+    gap: 0.1em;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+#break-popup p,
+.popup-content p,
+.popup-content label
+{
+    display: block;
+    color: #f32730;
+    margin-bottom: 15px;
+}
+
+#break-popup button,
+.popup-content button {
+    width: 30%;
+}
+
+#custom-minutes,
+#custom-seconds {
+    width: 15%;
+}
+
+@media (max-width: 768px) {
+    button {
+        width: 28%;
+        max-width: 80%;
+    }
+
+    .flip-card {
+        font-size: 55px;
+        width: 1.5em;
+    }
+
+    .separator {
+        font-size: 55px;
+    }
+
+    #title {
+        font-size: 40px;
+    }
+
+    #LogOut {
+        width: 25%;
+    }
+
+    .popup {
+        width: 84%;
+    }
+    #break-popup button,
+    .popup-content button {
+        width: 40%;
+    }
+
+    #custom-minutes,
+    #custom-seconds {
+        width: 20%;
+        font-size: 16px;
+    }
 }

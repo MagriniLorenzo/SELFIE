@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>Sondaggi Interattivi</title>
+    <link rel="stylesheet" href="/private/style_sondaggi.css">
+</head>
+<body>
+    <div class="container">
+        <div class="create-poll">
+            <h2>Crea un nuovo sondaggio</h2>
+            <input type="text" id="newPollTitle" placeholder="Inserisci la domanda del sondaggio">
+            <div id="newOptions">
+                <input type="text" class="option-input" placeholder="Opzione 1">
+                <input type="text" class="option-input" placeholder="Opzione 2">
+            </div>
+            <button id="addOption">Aggiungi opzione</button>
+            <button id="createPoll">Crea sondaggio</button>
+        </div>
+        <div class="polls-container" id="pollsContainer">
+
+            <div class="wrapper" id="noPolls">
+                <header>Nessun sondaggio attivo</header>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/private/script_sondaggi.js"></script>
+</body>
+</html>

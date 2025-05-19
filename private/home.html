@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/private/style_home.css">
   <link rel="stylesheet" href="/private/style_meteo.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/private/script_home.js"></script>
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@11.3.0/dist/gridstack.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/gridstack@11.3.0/dist/gridstack-all.js"></script>
 
@@ -14,8 +14,9 @@
 </head>
 <body>
 <nav>
-  <button id="LogOut">Log Out</button>
   <button class="resetToday-btn">Reset Today</button>
+  <h1>SELFIE</h1>
+  <button id="LogOut">Log Out</button>
 </nav>
 <div class="grid-stack widgets-container">
   <!-- Widget del Calendario -->
@@ -33,7 +34,7 @@
   </div>
 
   <!-- Widget delle Note -->
-  <div class="grid-stack-item" gs-x="0" gs-y="3" gs-w="12" gs-h="3">
+  <div class="grid-stack-item" gs-x="0" gs-y="4" gs-w="12" gs-h="3">
     <div class="grid-stack-item-content widget-container notes-widget" id="widget-notes">
       <div class="notes-header">
         <h1>Note</h1>
@@ -45,7 +46,7 @@
   </div>
 
   <!-- Widget del Timer -->
-  <div class="grid-stack-item" gs-x="7" gs-y="6" gs-w="5" gs-h="3">
+  <div class="grid-stack-item" gs-x="4" gs-y="7" gs-w="4" gs-h="3">
     <div class="grid-stack-item-content widget-container timer-widget" id="widget-timer">
       <div class="timer-header">
         <h1>Pomodoro Timer</h1>
@@ -56,8 +57,21 @@
     </div>
   </div>
 
+    <!-- Widget dei Poll -->
+    <div class="grid-stack-item" gs-x="8" gs-y="7" gs-w="4" gs-h="3">
+      <div class="grid-stack-item-content widget-container poll-widget" id="widget-poll">
+        <div class="poll-header">
+          <h1>Sondaggi</h1>
+        </div>
+        <div class="poll-content">
+          <img src="/private/image/poll.png">
+        </div>
+      </div>
+    </div>
+  
+
     <!-- Widget del Meteo -->
-    <div class="grid-stack-item" gs-x="0" gs-y="6" gs-w="7" gs-h="3" gs-no-resize="true">
+    <div class="grid-stack-item" gs-x="0" gs-y="7" gs-w="4" gs-h="3">
       <div class="grid-stack-item-content widget-container meteo-widget" id="widget-meteo">
         <div class="meteo-header">
           <div class="search-box">
@@ -68,8 +82,8 @@
 
         <div class="meteo-content">
           <div class="location-not-found">
-            <h1>Sorry, Location not found!!!</h1>
-            <img src="/private/image/404.png" alt="404 Error">
+            <h1>Località non trovata!</h1>
+            <img src="/private/image/error.png" alt="404 Error">
           </div>
 
           <h2 id="city"></h2>

@@ -21,21 +21,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     weather_body = document.querySelector('.weather-body');
     resetTodayBtn = document.querySelector('.resetToday-btn');
 
-    // Seleziona il contenitore dei widget
-    var grid = GridStack.init({
-        cellHeight: 80,
-        minRow: 1,
-        float: true,
-        disableOneColumnMode: true,
-    });
+    adjustWidgetLayout();
+    window.addEventListener('resize', adjustWidgetLayout);
 
     await initHome();
 
     // Aggiungi evento per tutto il widget calendar-widget tranne che sui giorni
     document.querySelector(".calendar-widget").addEventListener("click", (e) => {
-        // Verifica che l'elemento cliccato non sia un giorno della settimana
         if (!e.target.classList.contains("week-day")) {
-            window.location.href = "/home/calendario";  // Reindirizza a calendario.html
+            window.location.href = "/home/calendario"; 
         }
     });
 
@@ -47,6 +41,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.querySelector(".timer-widget").addEventListener("click", (e) => {
         window.location.href = "/home/timer";
+    });
+
+    document.querySelector(".poll-widget").addEventListener("click", (e) => {
+        window.location.href = "/home/sondaggi";
     });
 
     document.querySelector("#LogOut").addEventListener("click", logOut);
@@ -66,7 +64,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 });
-
 
 function normalizeDate(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -105,12 +102,9 @@ function displayCurrentWeek() {
 
 async function loadEvents(data) {
     try {
-        const response = await fetch("http://localhost:3000/events");
-        if (!response.ok){
-            throw new Error("Errore nel recupero degli eventi");
-        }
+        const response = await axios.get("/events");
 
-        const dati = await response.json();
+        const dati = await response.data;
         const eventiDaMostrare = dati.filter(event =>{
                 if(event.start===""){
                     return normalizeDate(data).toLocaleDateString("it-IT") === normalizeDate(new Date(event.end)).toLocaleDateString("it-IT");
@@ -131,30 +125,33 @@ async function loadEvents(data) {
     }
 }
 
-function recuperaNote() {
-    fetch("http://localhost:3000/notes")
-        .then(res => res.json())
-        .then(dati => {
-            if (notesList) {
-                notesList.innerHTML = dati.length
-                    ? dati.map(nota => {
-                        const maxLength = 50; // Lunghezza massima dell'estratto
-                        let contentPreview = nota.content;
+async function recuperaNote() {
+    try {
+        let response = await axios.get("/notes")
+        let data = response.data;
+        if (notesList) {
+            // Prendo solo le prime 3 note
+            const primeTreNote = data.slice(0, 3);
 
-                        if (nota.content.length > maxLength) {
-                            const truncated = nota.content.substring(0, maxLength);
-                            const lastSpaceIndex = truncated.lastIndexOf(' ');
-                            contentPreview = truncated.substring(0, lastSpaceIndex) + '...';
-                        }
+            notesList.innerHTML = primeTreNote.length
+                ? primeTreNote.map(nota => {
+                    // Rimuovo HTML, mantenendo gli spazi
+                    const plainText = nota.content.replace(/<\/?p>/g, ' ').replace(/<[^>]*>/g, '');
+                    let preview = plainText.substring(0, 40);
 
-                        return `<li>
-                    <strong>${nota.title}</strong>: ${contentPreview}
-                  </li>`;
-                    }).join('')
-                    : '<li>Nessuna nota disponibile!</li>';
-            }
-        })
-        .catch(console.error);
+                    if (plainText.length > 40) {
+                        const lastSpaceIndex = preview.lastIndexOf(' ');
+                        preview = preview.substring(0, lastSpaceIndex) + '...';
+                    }
+
+                    return `<li><strong>${nota.title}</strong>: ${preview}</li>`;
+                }).join('')
+                : '<li>Nessuna nota disponibile!</li>';
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 const preSelectToday = async () => {
@@ -167,14 +164,12 @@ const preSelectToday = async () => {
 };
 
 async function logOut(){
-    await fetch("http://localhost:3000/logout")
-        .then(res => res.json())
-        .then(dati => {
-            console.log(dati);
-            window.location.href = "/";
-        })
-        .catch(console.error);
-
+    try {
+        await axios.get("/logout")
+        window.location.href = "/";
+    } catch (error){
+        console.error(error);
+    }
 }
 
 function formatEvent(event, data){
@@ -201,30 +196,31 @@ function formatEvent(event, data){
     return`<li>${event.title}   ${formattedTimeRange}</li>`
 }
 
-
-
 async function weather(city){
     const api_key = "fa8f1299cf20ad11a0a352cc63ab9499";
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${api_key}&lang=it`;
-
-    const weather_data = await fetch(`${url}`).then(response => response.json());
-
-    if(weather_data.cod === `404`){
+    let weather_data;
+    try {
+        weather_data = await axios.get(`${url}`);
+        weather_data = weather_data.data;
+    } catch (error) {
         location_not_found.style.display = "flex";
+        cityN.style.display = "none";
         weather_body.style.display = "none";
         console.log("error");
         return;
     }
+
     cityN.textContent = city;
     inputBox.value = "";
     location_not_found.style.display = "none";
+    cityN.style.display = "block";
     weather_body.style.display = "flex";
     temperature.innerHTML = `${Math.round(weather_data.main.temp - 273.15)}°C`;
     description.innerHTML = `${weather_data.weather[0].description}`;
 
     const localOffset = today.getTimezoneOffset() * 60;
     const timezoneOffset = (weather_data.timezone) + localOffset;
-    
 
     const currentTimeUTC = Math.floor(Date.now() / 1000);
     const currentTime = currentTimeUTC + timezoneOffset;
@@ -274,14 +270,10 @@ async function weather(city){
 
 }
 
-
 async function getToday() {
     try {
-        const response = await fetch("http://localhost:3000/get-today");
-        if (!response.ok) {
-            throw new Error("Errore nel recupero della data");
-        }
-        const data = await response.json();
+        const response = await axios.get("/get-today");
+        const data =  response.data;
         return new Date(data.today); // Converte la stringa ISO in oggetto Date
     } catch (error) {
         console.error("Errore:", error);
@@ -295,16 +287,9 @@ async function setToday(date) {
     year = today.getFullYear();
 
     try {
-        const response = await fetch("http://localhost:3000/setToday", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ newDate : today })
+        await axios.post("/setToday", {newDate: today}, {
+            headers: {"Content-Type": "application/json"}
         });
-
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.error || "Errore nell'invio della data");
-        }
     } catch (error) {
         console.error("Errore:", error);
     }
@@ -312,42 +297,74 @@ async function setToday(date) {
 
 async function initHome() {
     today = await getToday();
-
-    if(!today){
-        return;
-    }
+    if (!today) return;
 
     displayWeekDays();
     displayCurrentWeek();
 
-    await loadEvents(today);
-    recuperaNote();
+    const eventsPromise = loadEvents(today);
+    const notesPromise = recuperaNote();
+    const weatherPromise = weather("Bologna");
 
     if (weekDaysContainer) {
         weekDaysContainer.addEventListener("click", async (e) => {
             if (e.target.classList.contains("week-day")) {
-                const selectedDay = weekDaysContainer.querySelector(".week-day.selected");
-                if (selectedDay) {
-                    selectedDay.classList.remove("selected");
-                }
+                weekDaysContainer.querySelector(".week-day.selected")?.classList.remove("selected");
                 e.target.classList.add("selected");
 
-                let formattedDate = e.target.getAttribute('data-date').split("/").reverse().join("-")
+                let formattedDate = e.target.getAttribute('data-date').split("/").reverse().join("-");
                 const clickedDate = new Date(formattedDate);
-                if (normalizeDate(clickedDate).getTime() === normalizeDate(today).getTime()) {
-                    eventsTodayTitle.textContent = "Eventi di Oggi";
-                } else {
-                    const giorniSettimana = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
-                    const dayOfWeek = giorniSettimana[clickedDate.getDay()];
 
-                    // let dayLong = clickedDate.toLocaleDateString('it-IT', { weekday: 'long' });
-                    eventsTodayTitle.textContent = `Eventi di ${dayOfWeek}`;
-                }
+                const giorniSettimana = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+                const dayOfWeek = giorniSettimana[clickedDate.getDay()];
+                eventsTodayTitle.textContent = normalizeDate(clickedDate).getTime() === normalizeDate(today).getTime()
+                    ? "Eventi di Oggi"
+                    : `Eventi di ${dayOfWeek}`;
+
                 await loadEvents(clickedDate);
             }
         });
+
         await preSelectToday();
     }
 
-    await weather("Bologna");
+    await Promise.all([eventsPromise, notesPromise, weatherPromise]);
+}
+
+function adjustWidgetLayout() {
+    const screenWidth = window.innerWidth;
+    const isMobile = screenWidth < 768;
+    const cellHeight = isMobile ? 60 : 80;
+
+    var grid = GridStack.init({
+        cellHeight: cellHeight,
+        minRow: 1,
+        float: true,
+        disableOneColumnMode: true,
+        disableResize: isMobile,
+        disableDrag: isMobile
+    });
+
+    const calendarWidget = document.querySelector('.calendar-widget').closest('.grid-stack-item');
+    const notesWidget = document.querySelector('.notes-widget').closest('.grid-stack-item');
+    const timerWidget = document.querySelector('.timer-widget').closest('.grid-stack-item');
+    const meteoWidget = document.querySelector('.meteo-widget').closest('.grid-stack-item');
+    const pollWidget = document.querySelector('.poll-widget').closest('.grid-stack-item');
+
+    if (screenWidth < 768) {
+        grid.update(calendarWidget, { x: 0, y: 0, w: 12, h: 4 });
+        grid.update(notesWidget, { x: 0, y: 4, w: 12, h: 3 });
+        grid.update(timerWidget, { x: 7, y: 7, w: 5, h: 2 });
+        grid.update(meteoWidget, { x: 0, y: 7, w: 7, h: 4 });
+        grid.update(pollWidget, { x: 7, y: 9, w: 5, h: 2 });
+    } else {
+
+        grid.update(calendarWidget, { x: 0, y: 0, w: 12, h: 4 });
+                
+        grid.update(notesWidget, { x: 0, y: 4, w: 12, h: 3 });
+        
+        grid.update(timerWidget, { x: 4, y: 7, w: 4, h: 3 });
+        grid.update(meteoWidget, { x: 0, y: 7, w: 4, h: 3 });
+        grid.update(pollWidget, { x: 8, y: 7, w: 4, h: 3 });
+    }
 }

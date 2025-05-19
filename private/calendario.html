@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Stay organized with our user-friendly Calendar featuring events, reminders, and a customizable interface. Built with HTML, CSS, and JavaScript. Start scheduling today!"
+      content=""
     />
     <meta
       name="keywords"
-      content="calendar, events, reminders, javascript, html, css, open source coding"
+      content=""
     />
     <link
       rel="stylesheet"
@@ -20,10 +20,9 @@
       referrerpolicy="no-referrer"
     />
     <link rel="stylesheet" href="/private/style_calendario.css" />
-    <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/private/script_calendario.js"></script>
-    <title>Calendar with Events</title>
+    <title>Calendario</title>
   </head>
   <body>
     <div class="container">
@@ -102,12 +101,6 @@
                   <option value="YEARLY">yearly</option>
                 </select>
               </div>
-<!--              <label>-->
-<!--                Interval:-->
-<!--                <input type="number" min="1" step="1" size="1" class="add-event-interval">-->
-<!--              </label>-->
-<!--            </div>-->
-<!--            <div id="repeatOptions">-->
               <div id="div-weekday" class="add-event-input">
                 <p>Repeat On:</p>
                 <select id="weekday">
@@ -156,6 +149,7 @@
           </div>
           <h2 class="full-event-title"></h2>
           <p class="full-event-time"></p>
+          <p id="eventLocation" class="full-event-location"></p>
           <p class="full-event-description"></p>
           <div class="footer-event">
             <p class="full-event-dates"></p>

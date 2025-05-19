@@ -1,6 +1,7 @@
 import {MongoClient, ObjectId} from "mongodb";
-//const uri = "mongodb://127.0.0.1:27017";
-const uri = "mongodb+srv://selfie:3iNtvxv4YdSHEd6@selfie.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000";
+
+const uri = "mongodb://localhost:27017";
+
 const dbName = "SELFIE";
 const tableNames = ["EVENT", "NOTE", "USER", "POLL"];
 

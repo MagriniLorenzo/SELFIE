@@ -1,8 +1,7 @@
 "# Responsive-Calendar-with-Events" 
 
 pacchetti npm da installare:
-npm install express-session passport passport-local bcryptjs body-parser datebook rrule ical-generator
-
+npm install express-session passport passport-local bcryptjs body-parser datebook
 
 credenziali di login:
     username: admin

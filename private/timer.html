@@ -1,50 +1,143 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timer Pomodoro</title>
     <link rel="stylesheet" href="/private/style_timer.css">
-    <script src="/private/script_timer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/private/script_timer.js" defer></script>
 </head>
-
 <body>
-
 <nav>
     <h1 id="title">Pomodoro Timer</h1>
     <button id="LogOut">Log out</button>
 </nav>
-
 <div class="timer">
-
-            <div>
-                <button id="pomodoro-session">Pomodoro</button>
-                <button id="short-break">Pausa Breve</button>
-                <button id="long-break">Pausa Lunga</button>
-            </div>
-
-            <main>
-                <div>
-                    <div id="pomodoro-timer" class="timer-display">
-                        <h1 class="time">25:00</h1>
+    <div>
+        <button id="pomodoro-session">Pomodoro</button>
+        <button id="short-break">Pausa Breve</button>
+        <button id="long-break">Pausa Lunga</button>
+    </div>
+    <main>
+        <div>
+            <div id="pomodoro-timer" class="timer-display">
+                <div class="container">
+                    <div class="container-segment">
+                        <div class="segment">
+                            <div class="flip-card" data-pomodoro-minutes-tens>
+                                <div class="top">2</div>
+                                <div class="bottom">2</div>
+                            </div>
+                            <div class="flip-card" data-pomodoro-minutes-ones>
+                                <div class="top">5</div>
+                                <div class="bottom">5</div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div id="short-timer" class="timer-display">
-                        <h1 class="time">05:00</h1>
+                    <div class="container-separator">
+                        <div class="separator">:</div>
                     </div>
-
-                    <div id="long-timer" class="timer-display">
-                        <h1 class="time">10:00</h1>
+                    <div class="container-segment">
+                        <div class="segment">
+                            <div class="flip-card" data-pomodoro-seconds-tens>
+                                <div class="top">0</div>
+                                <div class="bottom">0</div>
+                            </div>
+                            <div class="flip-card" data-pomodoro-seconds-ones>
+                                <div class="top">0</div>
+                                <div class="bottom">0</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </main>
-
-            <div>
-                <button id="start">START</button>
-                <button id="stop">STOP</button>
+            </div>
+            <div id="short-timer" class="timer-display">
+                <div class="container">
+                    <div class="container-segment">
+                        <div class="segment">
+                            <div class="flip-card" data-short-minutes-tens>
+                                <div class="top">0</div>
+                                <div class="bottom">0</div>
+                            </div>
+                            <div class="flip-card" data-short-minutes-ones>
+                                <div class="top">5</div>
+                                <div class="bottom">5</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-separator">
+                        <div class="separator">:</div>
+                    </div>
+                    <div class="container-segment">
+                        <div class="segment">
+                            <div class="flip-card" data-short-seconds-tens>
+                                <div class="top">0</div>
+                                <div class="bottom">0</div>
+                            </div>
+                            <div class="flip-card" data-short-seconds-ones>
+                                <div class="top">0</div>
+                                <div class="bottom">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="long-timer" class="timer-display">
+                <div class="container">
+                    <div class="container-segment">
+                        <div class="segment">
+                            <div class="flip-card" data-long-minutes-tens>
+                                <div class="top">1</div>
+                                <div class="bottom">1</div>
+                            </div>
+                            <div class="flip-card" data-long-minutes-ones>
+                                <div class="top">0</div>
+                                <div class="bottom">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-separator">
+                        <div class="separator">:</div>
+                    </div>
+                    <div class="container-segment">
+                        <div class="segment">
+                            <div class="flip-card" data-long-seconds-tens>
+                                <div class="top">0</div>
+                                <div class="bottom">0</div>
+                            </div>
+                            <div class="flip-card" data-long-seconds-ones>
+                                <div class="top">0</div>
+                                <div class="bottom">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-</body>
 
+        <div id="custom-time-popup" class="popup">
+        <div class="popup-content">
+            <p>Imposta Durata Personalizzata</p>
+            <label>Minuti: <input type="number" id="custom-minutes" min="0" max="99"></label>
+            <label>Secondi: <input type="number" id="custom-seconds" min="0" max="59"></label>
+            <button id="set-custom-time">Imposta</button>
+            <button id="cancel-custom-time">Annulla</button>
+        </div>
+        </div>
+
+        <div id="break-popup" class="popup">
+            <p>Hai finito la sessione di studio! Scegli una pausa</p>
+            <button id="short-break-btn">Pausa Breve</button>
+            <button id="long-break-btn">Pausa Lunga</button>
+        </div>
+
+    </main>
+    <div>
+        <button id="start">START</button>
+        <button id="azzera">AZZERA</button>
+        <button id="stop">STOP</button>
+    </div>
+</div>
+</body>
 </html>
